@@ -36,11 +36,11 @@ class SettingKeyBoardLayout : AppCompatActivity() {
     }
 
     class CustomRecyclerAdapter : RecyclerView.Adapter<CustomRecyclerAdapter.MyViewHolder>() {
-
+/*s
         private var mainLayout: LinearLayout? = null
         private lateinit var editText: EditText
         private lateinit var editAlertDialog: AlertDialog
-
+*/
         class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val mainLayout: ConstraintLayout = itemView.findViewById(R.id.main)
             val combinationTextView: TextView = itemView.findViewById(R.id.combinate)
@@ -94,7 +94,7 @@ class SettingKeyBoardLayout : AppCompatActivity() {
 
             return "($first➜$last)\n($last➜$first)"
         }
-        private fun initAlertDialog(context: Context){
+  /*      private fun initAlertDialog(context: Context){
             if(mainLayout != null) return
 
             mainLayout = LinearLayout(context)
@@ -137,7 +137,7 @@ class SettingKeyBoardLayout : AppCompatActivity() {
                 .setNeutralButton("Cancel", null)
                 .create()
         }
-
+*/
     }
 
 }
