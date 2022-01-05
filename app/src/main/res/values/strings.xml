@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Swipe KeyBoard</string>
+
+    <string name="draw_over_other_apps">Разрешение поверх окон</string>
+    <string name="turn_on_keyboard">Включить клавиатуру</string>
+    <string name="select_keyboard">Выбрать клавиатуру</string>
+    <string name="setting_layout">Настройка раскладки</string>
+
+    <string name="backspace">⌫</string>
+    <string name="enter">⏎</string>
+    <string name="space">˽</string>
+</resources>
