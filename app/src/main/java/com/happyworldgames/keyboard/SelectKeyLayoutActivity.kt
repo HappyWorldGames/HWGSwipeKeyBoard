@@ -1,5 +1,7 @@
 package com.happyworldgames.keyboard
 
+import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,11 +17,12 @@ import com.happyworldgames.keyboard.databinding.SettingKeyboardBinding
 class SelectKeyLayoutActivity : AppCompatActivity() {
     companion object {
         private val allSymbolsName = arrayListOf(
-            "Symbols", "English"
+            "Symbols", "English", "Russia"
         )
         private val allSymbols = arrayListOf(
-            arrayListOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", ",", ";", ":"),
-            arrayListOf("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
+            arrayListOf("⌫", "⏎", "˽", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", ",", ";", ":"),
+            arrayListOf("A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f", "G", "g", "H", "h", "I", "i", "J", "j", "K", "k", "L", "l", "M", "m", "N", "n", "O", "o", "P", "p", "Q", "q", "R", "r", "S", "s", "T", "t", "U", "u", "V", "v", "W", "w", "X", "x", "Y", "y", "Z", "z"),
+            arrayListOf("А", "а", "Б", "б", "В", "в", "Г", "г", "Д", "д", "Е", "е", "Ё", "ё", "Ж", "ж", "З", "з", "И", "и", "Й", "й", "К", "к", "Л", "л", "М", "м", "Н", "н", "О", "о", "П", "п", "Р", "р", "С", "с", "Т", "т", "У", "у", "Ф", "ф", "Х", "х", "Ц", "ц", "Ч", "ч", "Ш", "ш", "Щ", "щ", "Ъ", "ъ", "Ы", "ы", "Ь", "ь", "Э", "э", "Ю", "ю", "Я", "я"),
         )
     }
 
@@ -49,20 +52,12 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
                 selectKeyLayoutBinding.editText.text = selectKeyLayoutBinding.editText.text.delete(length -1, length)
             }
         }
-        selectKeyLayoutBinding.backspaceButton.setOnClickListener {
-            selectKeyLayoutBinding.editText.append("⌫")
-        }
-        selectKeyLayoutBinding.enterButton.setOnClickListener {
-            selectKeyLayoutBinding.editText.append("⏎")
-        }
-        selectKeyLayoutBinding.spaceButton.setOnClickListener {
-            selectKeyLayoutBinding.editText.append("˽")
-        }
     }
 
     override fun onBackPressed() {
         SimpleIME.hintArray[positionItem] = selectKeyLayoutBinding.editText.text.toString()
-        super.onBackPressed()
+        //TODO SAVE
+        startActivity(Intent(this, SettingKeyBoardLayout::class.java))
     }
 
     inner class CustomViewPagerRecyclerAdapter : RecyclerView.Adapter<CustomViewPagerRecyclerAdapter.MyViewHolder>() {
@@ -77,7 +72,8 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-            holder.main.symbolsRecyclerView.layoutManager = GridLayoutManager(holder.main.root.context, 4)
+            val spanCount = Resources.getSystem().displayMetrics.widthPixels / SimpleIME.convertDpToPixel(applicationContext, 70f).toInt()
+            holder.main.symbolsRecyclerView.layoutManager = GridLayoutManager(holder.main.root.context, spanCount)
             holder.main.symbolsRecyclerView.adapter = CustomRecyclerAdapter(allSymbols[position])
         }
 

@@ -1,6 +1,7 @@
 package com.happyworldgames.keyboard
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.PixelFormat
 import android.inputmethodservice.InputMethodService
 import android.os.Build
@@ -19,6 +20,10 @@ class SimpleIME : InputMethodService() {
             for(i in hintArrayNumber.indices)
                 hintHashMap[hintArrayNumber[i]] = hintArray[i]
             hintArray.add(" ")
+        }
+
+        fun convertDpToPixel(context: Context, dp: Float): Float {
+            return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
         }
     }
 
@@ -205,6 +210,6 @@ class SimpleIME : InputMethodService() {
     }
 
     private fun convertDpToPixel(dp: Float): Float {
-        return dp * (applicationContext.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+        return Companion.convertDpToPixel(applicationContext, dp)
     }
 }

@@ -38,4 +38,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingKeyBoardLayout::class.java))
         }
     }
+
+    override fun onBackPressed() {
+        finishAffinity()
+    }
 }

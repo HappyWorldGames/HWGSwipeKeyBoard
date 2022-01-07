@@ -1,17 +1,13 @@
 package com.happyworldgames.keyboard
 
-import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
@@ -26,21 +22,18 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(settingKeyBoardBinding.root)
 
-        settingKeyBoardBinding.symbolsRecyclerView.layoutManager = GridLayoutManager(this, 3) //LinearLayoutManager(this)
+        val spanCount = Resources.getSystem().displayMetrics.widthPixels / SimpleIME.convertDpToPixel(applicationContext, 120f).toInt()
+        settingKeyBoardBinding.symbolsRecyclerView.layoutManager = GridLayoutManager(this, spanCount)
         settingKeyBoardBinding.symbolsRecyclerView.adapter = CustomRecyclerAdapter()
     }
 
     override fun onBackPressed() {
         SimpleIME.fullHintHashMap()
-        super.onBackPressed()
+        startActivity(Intent(this, MainActivity::class.java))
     }
 
     class CustomRecyclerAdapter : RecyclerView.Adapter<CustomRecyclerAdapter.MyViewHolder>() {
-/*s
-        private var mainLayout: LinearLayout? = null
-        private lateinit var editText: EditText
-        private lateinit var editAlertDialog: AlertDialog
-*/
+
         class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val mainLayout: ConstraintLayout = itemView.findViewById(R.id.main)
             val combinationTextView: TextView = itemView.findViewById(R.id.combinate)
@@ -75,14 +68,6 @@ class SettingKeyBoardLayout : AppCompatActivity() {
                 val intent = Intent(context, SelectKeyLayoutActivity::class.java)
                 intent.putExtra("position", position)
                 context.startActivity(intent)
-/*
-                initAlertDialog(context)
-                editText.setText(SimpleIME.hintArray[position])
-
-                editAlertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK"){ _, _ ->
-                    SimpleIME.hintArray[position] = editText.text.toString()
-                }
-                editAlertDialog.show()*/
             }
         }
 
@@ -94,50 +79,7 @@ class SettingKeyBoardLayout : AppCompatActivity() {
 
             return "($first➜$last)\n($last➜$first)"
         }
-  /*      private fun initAlertDialog(context: Context){
-            if(mainLayout != null) return
 
-            mainLayout = LinearLayout(context)
-            mainLayout!!.orientation = LinearLayout.VERTICAL
-
-            editText = EditText(context)
-            mainLayout!!.addView(editText)
-
-            val buttons = LinearLayout(context)
-            buttons.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            buttons.orientation = LinearLayout.HORIZONTAL
-            mainLayout!!.addView(buttons)
-
-            val backspaceButton = Button(context)
-            backspaceButton.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            backspaceButton.text = "⌫"
-            backspaceButton.setOnClickListener {
-                editText.append("⌫")
-            }
-            buttons.addView(backspaceButton)
-
-            val enterButton = Button(context)
-            enterButton.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            enterButton.text = "⏎"
-            enterButton.setOnClickListener {
-                editText.append("⏎")
-            }
-            buttons.addView(enterButton)
-
-            val spaceButton = Button(context)
-            spaceButton.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            spaceButton.text = "˽"
-            spaceButton.setOnClickListener {
-                editText.append("˽")
-            }
-            buttons.addView(spaceButton)
-
-            editAlertDialog = AlertDialog.Builder(context)
-                .setView(mainLayout)
-                .setNeutralButton("Cancel", null)
-                .create()
-        }
-*/
     }
 
 }
