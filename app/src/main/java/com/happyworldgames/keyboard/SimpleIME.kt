@@ -75,7 +75,6 @@ class SimpleIME : InputMethodService() {
                     longClickTime = System.currentTimeMillis()
                 }
             }
-            MotionEvent.ACTION_HOVER_ENTER -> Log.e("HWG", "HOVER ID:" + v.id)
             MotionEvent.ACTION_UP -> {
                 lastId = posToNumberPos(event.x.toInt(), event.y.toInt())
                 Log.e("HWG", "UP ID:$lastId")
@@ -99,6 +98,7 @@ class SimpleIME : InputMethodService() {
                         lastY = event.rawY
                     }
                 }
+                if(mode != 1) hintPosition(posToNumberPos(event.x.toInt(), event.y.toInt()))
             }
         }
         true
@@ -184,6 +184,20 @@ class SimpleIME : InputMethodService() {
         hintKeyboardBinding.viewPos7.text = "7"
         hintKeyboardBinding.viewPos8.text = "8"
         hintKeyboardBinding.viewPos9.text = "9"
+
+        hintPosition(-1)
+    }
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun hintPosition(pos: Int){
+        hintKeyboardBinding.viewPos1.background = if(pos == 1) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos2.background = if(pos == 2) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos3.background = if(pos == 3) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos4.background = if(pos == 4) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos5.background = if(pos == 5) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos6.background = if(pos == 6) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos7.background = if(pos == 7) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos8.background = if(pos == 8) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos9.background = if(pos == 9) getDrawable(R.drawable.custom_border) else null
     }
 
     override fun onWindowShown() {
