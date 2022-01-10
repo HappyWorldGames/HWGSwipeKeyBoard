@@ -20,7 +20,7 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
             "Symbols", "English", "Russia"
         )
         private val allSymbols = arrayListOf(
-            arrayListOf("⌫", "⏎", "˽", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", ",", ";", ":"),
+            arrayListOf("⌫", "⏎", "˽", "⤆", "⤇", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", ",", ";", ":"),
             arrayListOf("A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f", "G", "g", "H", "h", "I", "i", "J", "j", "K", "k", "L", "l", "M", "m", "N", "n", "O", "o", "P", "p", "Q", "q", "R", "r", "S", "s", "T", "t", "U", "u", "V", "v", "W", "w", "X", "x", "Y", "y", "Z", "z"),
             arrayListOf("А", "а", "Б", "б", "В", "в", "Г", "г", "Д", "д", "Е", "е", "Ё", "ё", "Ж", "ж", "З", "з", "И", "и", "Й", "й", "К", "к", "Л", "л", "М", "м", "Н", "н", "О", "о", "П", "п", "Р", "р", "С", "с", "Т", "т", "У", "у", "Ф", "ф", "Х", "х", "Ц", "ц", "Ч", "ч", "Ш", "ш", "Щ", "щ", "Ъ", "ъ", "Ы", "ы", "Ь", "ь", "Э", "э", "Ю", "ю", "Я", "я"),
         )
@@ -28,14 +28,15 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
 
     private val selectKeyLayoutBinding by lazy { SelectKeyLayoutBinding.inflate(layoutInflater) }
 
+    private val positionArray by lazy { intent.getIntExtra("array", -1) }
     private val positionItem by lazy { intent.getIntExtra("position", -1) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(selectKeyLayoutBinding.root)
 
-        if(positionItem == -1) return
-        selectKeyLayoutBinding.editText.setText(SimpleIME.hintArray[positionItem])
+        if(positionItem == -1 || positionArray == -1) return
+        selectKeyLayoutBinding.editText.setText(SimpleIME.hintArrayList[positionArray][positionItem])
 
         selectKeyLayoutBinding.viewpager.adapter = CustomViewPagerRecyclerAdapter()
         TabLayoutMediator(selectKeyLayoutBinding.tabLayout, selectKeyLayoutBinding.viewpager) { tab, position ->
@@ -55,8 +56,7 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        SimpleIME.hintArray[positionItem] = selectKeyLayoutBinding.editText.text.toString()
-        //TODO SAVE
+        SimpleIME.hintArrayList[positionArray][positionItem] = selectKeyLayoutBinding.editText.text.toString()
         startActivity(Intent(this, SettingKeyBoardLayout::class.java))
     }
 

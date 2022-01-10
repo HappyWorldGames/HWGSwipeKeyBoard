@@ -12,27 +12,51 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayoutMediator
 import com.happyworldgames.keyboard.databinding.SettingKeyboardBinding
+import com.happyworldgames.keyboard.databinding.SettingKeyboardViewPagerBinding
 
 class SettingKeyBoardLayout : AppCompatActivity() {
 
-    private val settingKeyBoardBinding by lazy { SettingKeyboardBinding.inflate(layoutInflater) }
+    private val settingKeyBoardViewPagerBinding by lazy { SettingKeyboardViewPagerBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(settingKeyBoardBinding.root)
+        setContentView(settingKeyBoardViewPagerBinding.root)
 
-        val spanCount = Resources.getSystem().displayMetrics.widthPixels / SimpleIME.convertDpToPixel(applicationContext, 120f).toInt()
-        settingKeyBoardBinding.symbolsRecyclerView.layoutManager = GridLayoutManager(this, spanCount)
-        settingKeyBoardBinding.symbolsRecyclerView.adapter = CustomRecyclerAdapter()
+        settingKeyBoardViewPagerBinding.keyLayoutView.adapter = CustomViewPagerRecyclerAdapter()
+        TabLayoutMediator(settingKeyBoardViewPagerBinding.keyLayouts, settingKeyBoardViewPagerBinding.keyLayoutView) { tab, position ->
+            tab.text = "№$position"
+        }.attach()
     }
 
     override fun onBackPressed() {
-        SimpleIME.fullHintHashMap()
+        SimpleIME.replaceKeyBoardLayout(0)
+        SimpleIME.saveHintArrayList()
         startActivity(Intent(this, MainActivity::class.java))
     }
 
-    class CustomRecyclerAdapter : RecyclerView.Adapter<CustomRecyclerAdapter.MyViewHolder>() {
+    inner class CustomViewPagerRecyclerAdapter : RecyclerView.Adapter<CustomViewPagerRecyclerAdapter.MyViewHolder>() {
+
+        inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val main = SettingKeyboardBinding.bind(itemView)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+            val itemView = LayoutInflater.from(parent.context).inflate(R.layout.setting_keyboard, parent, false)
+            return MyViewHolder(itemView)
+        }
+
+        override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+            val spanCount = Resources.getSystem().displayMetrics.widthPixels / SimpleIME.convertDpToPixel(applicationContext, 120f).toInt()
+            holder.main.symbolsRecyclerView.layoutManager = GridLayoutManager(holder.main.root.context, spanCount)
+            holder.main.symbolsRecyclerView.adapter = CustomRecyclerAdapter(position)
+        }
+
+        override fun getItemCount(): Int = SimpleIME.hintArrayList.size
+    }
+
+    class CustomRecyclerAdapter(private val dataIndex: Int) : RecyclerView.Adapter<CustomRecyclerAdapter.MyViewHolder>() {
 
         class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val mainLayout: ConstraintLayout = itemView.findViewById(R.id.main)
@@ -60,13 +84,14 @@ class SettingKeyBoardLayout : AppCompatActivity() {
 
             holder.mainLayout.setBackgroundColor(backgroundColor)
             holder.combinationTextView.text = combinationToString(SimpleIME.hintArrayNumber[position])
-            holder.combinationValueTextView.text = SimpleIME.hintArray[position]
+            holder.combinationValueTextView.text = SimpleIME.hintArrayList[dataIndex][position]
 
             holder.itemView.setOnClickListener {
                 val context = holder.itemView.context
 
                 val intent = Intent(context, SelectKeyLayoutActivity::class.java)
                 intent.putExtra("position", position)
+                intent.putExtra("array", dataIndex)
                 context.startActivity(intent)
             }
         }

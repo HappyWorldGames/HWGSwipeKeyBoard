@@ -10,16 +10,39 @@ import android.util.Log
 import android.view.*
 import com.happyworldgames.keyboard.databinding.HintKeyboardBinding
 import com.happyworldgames.keyboard.databinding.KeyboardBinding
+import java.io.File
 
 class SimpleIME : InputMethodService() {
     companion object {
+        val hintArrayList = arrayListOf<ArrayList<String>>(
+            arrayListOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M", "1", "2", "3", "4", "5", "⏎", "˽", "⤆", "⤇", "⌫"),
+            arrayListOf("А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "⤆", "⤇", "⌫"),
+            arrayListOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", ".", "?", "!", ":", ";", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "⤆", "⤇", "⌫"),
+        )
+        private lateinit var saveFile: File
+
         val hintArrayNumber = arrayOf(12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 45, 46, 47, 48, 49, 56, 57, 58, 59, 67, 68, 69, 78, 79, 89)
         val hintArray = arrayListOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M", "1", "2", "3", "4", "5", "6", "7", "⏎", "˽", "⌫")
         private val hintHashMap = hashMapOf<Int, String>()
-        fun fullHintHashMap(){
+        private fun fullHintHashMap(){
             for(i in hintArrayNumber.indices)
                 hintHashMap[hintArrayNumber[i]] = hintArray[i]
             hintArray.add(" ")
+        }
+        fun replaceKeyBoardLayout(index: Int){
+            if(index > hintArrayList.size - 1) return
+            hintArray.clear()
+            hintArray.addAll(hintArrayList[index])
+            fullHintHashMap()
+        }
+
+        fun saveHintArrayList(){
+            if(!saveFile.exists()) saveFile.createNewFile()
+            val saveText = StringBuilder("")
+            for(item in hintArrayList){
+                saveText.appendLine(item.joinToString())
+            }
+            saveFile.writeText(saveText.toString())
         }
 
         fun convertDpToPixel(context: Context, dp: Float): Float {
@@ -28,9 +51,10 @@ class SimpleIME : InputMethodService() {
     }
 
     private var showKeyboard = false
+    private var keyBoardLayoutNow = 0
 
-    private var mode: Int = 0 // 0 = обычный, 1 = перемещение
-    var lastX = 0f
+    private var mode: Int = 0 // 0 = обычный, 1 = перемещение, -1 = запретить перемещение
+    private var lastX = 0f
     var lastY = 0f
     var longClickTime = System.currentTimeMillis()
 
@@ -107,11 +131,13 @@ class SimpleIME : InputMethodService() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
         super.onCreate()
-        fullHintHashMap()
+
+        saveFile = File(filesDir, "saveKeyBoardLayout.txt")
+        loadHintArrayList()
 
         mainParams.gravity = Gravity.BOTTOM or Gravity.CENTER
         mainParams.x = 0
-        mainParams.y = 0
+        mainParams.y = convertDpToPixel(40.toFloat()).toInt()
 
         hintParams.gravity = Gravity.TOP or Gravity.CENTER
         hintParams.x = 0
@@ -147,6 +173,8 @@ class SimpleIME : InputMethodService() {
             "⌫" -> currentInputConnection.deleteSurroundingText(1, 0)
             "˽" -> currentInputConnection.commitText(" ", 1)
             "⏎" -> currentInputConnection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+            "⤇" -> replaceKeyBoardLayoutForward()
+            "⤆" -> replaceKeyBoardLayoutBack()
             else -> currentInputConnection.commitText(result, result.length)
         }
     }
@@ -221,6 +249,27 @@ class SimpleIME : InputMethodService() {
         manager.removeView(hintKeyboardBinding.root)
         manager.removeView(keyboardBinding.root)
         showKeyboard = false
+    }
+
+    private fun loadHintArrayList(){
+        if(saveFile.exists()){
+            val lines = saveFile.readLines()
+            hintArrayList.clear()
+            for(item in lines){
+                hintArrayList.add(item.splitToSequence(", ").filter { it.isNotEmpty() }.toList() as ArrayList<String>)
+            }
+        }else saveHintArrayList()
+        replaceKeyBoardLayout(keyBoardLayoutNow)
+    }
+    private fun replaceKeyBoardLayoutForward(){
+        keyBoardLayoutNow++
+        if(keyBoardLayoutNow > hintArrayList.size - 1) keyBoardLayoutNow = 0
+        replaceKeyBoardLayout(keyBoardLayoutNow)
+    }
+    private fun replaceKeyBoardLayoutBack(){
+        keyBoardLayoutNow--
+        if(keyBoardLayoutNow < 0) keyBoardLayoutNow = hintArrayList.size - 1
+        replaceKeyBoardLayout(keyBoardLayoutNow)
     }
 
     private fun convertDpToPixel(dp: Float): Float {

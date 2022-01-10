@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(mainBinding.root)
 
-        mainBinding.button.setOnClickListener {
+        mainBinding.drawOverButton.setOnClickListener {
             if (Build.VERSION.SDK_INT > 23 /*&& !Settings.canDrawOverlays(this)*/) {
                 val intent = Intent(
                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -27,15 +27,18 @@ class MainActivity : AppCompatActivity() {
                 ActivityCompat.startActivityForResult(this, intent, 1, null)
             }
         }
-        mainBinding.button2.setOnClickListener {
+        mainBinding.turnOnKeyboardButton.setOnClickListener {
             startActivity(Intent("android.settings.INPUT_METHOD_SETTINGS"))
         }
-        mainBinding.button3.setOnClickListener {
+        mainBinding.selectKeyboardButton.setOnClickListener {
             val imeManager: InputMethodManager = applicationContext.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imeManager.showInputMethodPicker()
         }
-        mainBinding.button4.setOnClickListener {
+        mainBinding.settingLayoutButton.setOnClickListener {
             startActivity(Intent(this, SettingKeyBoardLayout::class.java))
+        }
+        mainBinding.learningButton.setOnClickListener {
+            startActivity(Intent(this, LearningActivity::class.java))
         }
     }
 
