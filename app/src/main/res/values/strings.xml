@@ -10,4 +10,6 @@
     <string name="learning">Обучение</string>
 
     <string name="backspace">⌫</string>
+
+    <string name="for_test">For Test</string>
 </resources>

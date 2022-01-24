@@ -6,12 +6,11 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/circle_center"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/circle_center"
         android:supportsRtl="true"
-        android:theme="@style/Theme.KeyBoard"
-        android:fullBackupContent="">
+        android:theme="@style/Theme.KeyBoard">
 
         <activity android:name=".MainActivity"
             android:exported="true">
