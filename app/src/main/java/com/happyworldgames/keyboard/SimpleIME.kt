@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
 import com.happyworldgames.keyboard.databinding.HintKeyboardBinding
 import com.happyworldgames.keyboard.databinding.KeyboardBinding
 import java.io.File
@@ -39,11 +40,7 @@ class SimpleIME : InputMethodService() {
 
         fun saveHintArrayList(){
             if(!saveFile.exists()) saveFile.createNewFile()
-            val saveText = StringBuilder("")
-            for(item in hintArrayList){
-                saveText.appendLine(item.joinToString())
-            }
-            saveFile.writeText(saveText.toString())
+            saveFile.writeText(hintArrayList.joinToString("\n") { it.joinToString() })
         }
 
         fun convertDpToPixel(context: Context, dp: Float): Float {
@@ -249,15 +246,15 @@ class SimpleIME : InputMethodService() {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun hintPosition(pos: Int){
-        hintKeyboardBinding.viewPos1.background = if(pos == 1) getDrawable(R.drawable.custom_border) else null
-        hintKeyboardBinding.viewPos2.background = if(pos == 2) getDrawable(R.drawable.custom_border) else null
-        hintKeyboardBinding.viewPos3.background = if(pos == 3) getDrawable(R.drawable.custom_border) else null
-        hintKeyboardBinding.viewPos4.background = if(pos == 4) getDrawable(R.drawable.custom_border) else null
-        hintKeyboardBinding.viewPos5.background = if(pos == 5) getDrawable(R.drawable.custom_border) else null
-        hintKeyboardBinding.viewPos6.background = if(pos == 6) getDrawable(R.drawable.custom_border) else null
-        hintKeyboardBinding.viewPos7.background = if(pos == 7) getDrawable(R.drawable.custom_border) else null
-        hintKeyboardBinding.viewPos8.background = if(pos == 8) getDrawable(R.drawable.custom_border) else null
-        hintKeyboardBinding.viewPos9.background = if(pos == 9) getDrawable(R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos1.background = if(pos == 1) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos2.background = if(pos == 2) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos3.background = if(pos == 3) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos4.background = if(pos == 4) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos5.background = if(pos == 5) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos6.background = if(pos == 6) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos7.background = if(pos == 7) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos8.background = if(pos == 8) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
+        hintKeyboardBinding.viewPos9.background = if(pos == 9) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
     }
 
     private fun loadHintArrayList(){
@@ -265,7 +262,7 @@ class SimpleIME : InputMethodService() {
             val lines = saveFile.readLines()
             hintArrayList.clear()
             for(item in lines){
-                hintArrayList.add(item.splitToSequence(", ").filter { it.isNotEmpty() }.toList() as ArrayList<String>)
+                hintArrayList.add(ArrayList(item.splitToSequence(", ").filter { it.isNotEmpty() }.toList()))
             }
         }else saveHintArrayList()
         replaceKeyBoardLayout(keyBoardLayoutNow)

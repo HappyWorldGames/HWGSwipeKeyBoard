@@ -3,6 +3,7 @@ package com.happyworldgames.keyboard
 import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -28,6 +29,12 @@ class MainActivity : AppCompatActivity() {
             windowInsets
         }
 
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finishAffinity()
+            }
+        })
+
         mainBinding.turnOnKeyboardButton.setOnClickListener {
             startActivity(Intent("android.settings.INPUT_METHOD_SETTINGS"))
         }
@@ -44,9 +51,5 @@ class MainActivity : AppCompatActivity() {
         mainBinding.privacyPolicyButton.setOnClickListener {
             startActivity(Intent(this, PrivacyPolicyActivity::class.java))
         }
-    }
-
-    override fun onBackPressed() {
-        finishAffinity()
     }
 }
