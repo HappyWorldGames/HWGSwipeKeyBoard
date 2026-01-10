@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -48,6 +49,13 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
         if(positionItem == -1 || positionArray == -1) return
         selectKeyLayoutBinding.editText.setText(SimpleIME.hintArrayList[positionArray][positionItem])
 
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                SimpleIME.hintArrayList[positionArray][positionItem] = selectKeyLayoutBinding.editText.text.toString()
+                startActivity(Intent(this@SelectKeyLayoutActivity, SettingKeyBoardLayout::class.java))
+            }
+        })
+
         selectKeyLayoutBinding.viewpager.adapter = CustomViewPagerRecyclerAdapter()
         TabLayoutMediator(selectKeyLayoutBinding.tabLayout, selectKeyLayoutBinding.viewpager) { tab, position ->
             tab.text = allSymbolsName[position]
@@ -63,11 +71,6 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
                 selectKeyLayoutBinding.editText.text = selectKeyLayoutBinding.editText.text.delete(length -1, length)
             }
         }
-    }
-
-    override fun onBackPressed() {
-        SimpleIME.hintArrayList[positionArray][positionItem] = selectKeyLayoutBinding.editText.text.toString()
-        startActivity(Intent(this, SettingKeyBoardLayout::class.java))
     }
 
     inner class CustomViewPagerRecyclerAdapter : RecyclerView.Adapter<CustomViewPagerRecyclerAdapter.MyViewHolder>() {

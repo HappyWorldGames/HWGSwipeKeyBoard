@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
@@ -38,16 +39,18 @@ class SettingKeyBoardLayout : AppCompatActivity() {
             windowInsets
         }
 
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                SimpleIME.replaceKeyBoardLayout(0)
+                SimpleIME.saveHintArrayList()
+                finish()
+            }
+        })
+
         settingKeyBoardViewPagerBinding.keyLayoutView.adapter = CustomViewPagerRecyclerAdapter()
         TabLayoutMediator(settingKeyBoardViewPagerBinding.keyLayouts, settingKeyBoardViewPagerBinding.keyLayoutView) { tab, position ->
             tab.text = "№$position"
         }.attach()
-    }
-
-    override fun onBackPressed() {
-        SimpleIME.replaceKeyBoardLayout(0)
-        SimpleIME.saveHintArrayList()
-        startActivity(Intent(this, MainActivity::class.java))
     }
 
     inner class CustomViewPagerRecyclerAdapter : RecyclerView.Adapter<CustomViewPagerRecyclerAdapter.MyViewHolder>() {
