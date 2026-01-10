@@ -10,6 +10,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayoutMediator
@@ -22,7 +26,17 @@ class SettingKeyBoardLayout : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(settingKeyBoardViewPagerBinding.root)
+
+        val controller = WindowInsetsControllerCompat(window, settingKeyBoardViewPagerBinding.root)
+        controller.isAppearanceLightStatusBars = true
+
+        ViewCompat.setOnApplyWindowInsetsListener(settingKeyBoardViewPagerBinding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
+        }
 
         settingKeyBoardViewPagerBinding.keyLayoutView.adapter = CustomViewPagerRecyclerAdapter()
         TabLayoutMediator(settingKeyBoardViewPagerBinding.keyLayouts, settingKeyBoardViewPagerBinding.keyLayoutView) { tab, position ->

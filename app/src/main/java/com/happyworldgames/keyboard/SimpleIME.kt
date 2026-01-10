@@ -2,12 +2,13 @@ package com.happyworldgames.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.PixelFormat
 import android.inputmethodservice.InputMethodService
-import android.os.Build
-import android.util.DisplayMetrics
 import android.util.Log
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.widget.FrameLayout
 import com.happyworldgames.keyboard.databinding.HintKeyboardBinding
 import com.happyworldgames.keyboard.databinding.KeyboardBinding
 import java.io.File
@@ -24,7 +25,7 @@ class SimpleIME : InputMethodService() {
         val hintArrayNumber = arrayOf(12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 45, 46, 47, 48, 49, 56, 57, 58, 59, 67, 68, 69, 78, 79, 89)
         val hintArray = arrayListOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M", "1", "2", "3", "4", "5", "6", "7", "⏎", "˽", "⌫")
         private val hintHashMap = hashMapOf<Int, String>()
-        private fun fullHintHashMap(){
+        private fun fullHintHashMap() {
             for(i in hintArrayNumber.indices)
                 hintHashMap[hintArrayNumber[i]] = hintArray[i]
             hintArray.add(" ")
@@ -46,11 +47,10 @@ class SimpleIME : InputMethodService() {
         }
 
         fun convertDpToPixel(context: Context, dp: Float): Float {
-            return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+            return dp * (context.resources.displayMetrics.densityDpi.toFloat() / android.util.DisplayMetrics.DENSITY_DEFAULT)
         }
     }
 
-    private var showKeyboard = false
     private var keyBoardLayoutNow = 0
 
     private var mode: Int = 0 // 0 = обычный, 1 = перемещение, -1 = запретить перемещение
@@ -61,31 +61,14 @@ class SimpleIME : InputMethodService() {
     var firstId = -1
     var lastId = -1
 
-    private val keyboardBinding by lazy { KeyboardBinding.inflate(layoutInflater) }
-    private val hintKeyboardBinding by lazy { HintKeyboardBinding.inflate(layoutInflater) }
-
-    private val manager by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
-
-    private val mainParams by lazy { WindowManager.LayoutParams(
-        convertDpToPixel(120.toFloat()).toInt(),
-        convertDpToPixel(120.toFloat()).toInt(),
-        if(Build.VERSION.SDK_INT < 26) WindowManager.LayoutParams.TYPE_PHONE else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-        PixelFormat.TRANSLUCENT
-    ) }
-    private val hintParams by lazy { WindowManager.LayoutParams(
-        convertDpToPixel(120.toFloat()).toInt(),
-        convertDpToPixel(120.toFloat()).toInt(),
-        if(Build.VERSION.SDK_INT < 26) WindowManager.LayoutParams.TYPE_PHONE else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-        PixelFormat.TRANSLUCENT
-    ) }
+    private lateinit var keyboardBinding: KeyboardBinding
+    private lateinit var hintKeyboardBinding: HintKeyboardBinding
+    private lateinit var container: FrameLayout
 
     @SuppressLint("ClickableViewAccessibility")
     val onTouchListener = View.OnTouchListener { v, event ->
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                event.xPrecision
                 lastX = event.rawX
                 lastY = event.rawY
 
@@ -110,16 +93,8 @@ class SimpleIME : InputMethodService() {
                     if (longClickTime + 1000 < System.currentTimeMillis() && mode == 0){
                         mode = 1
                         hintReturn()
-                    }else if (kotlin.math.abs(lastX - event.rawX) > convertDpToPixel(20f) || kotlin.math.abs(
-                            lastY - event.rawY
-                        ) > convertDpToPixel(20f)
-                    ) mode = -1
-                    if (mode == 1) {
-                        mainParams.x -= (lastX - event.rawX).toInt()
-                        mainParams.y += (lastY - event.rawY).toInt()
-                        manager.updateViewLayout(keyboardBinding.root, mainParams)
-                        lastX = event.rawX
-                        lastY = event.rawY
+                    }else if (kotlin.math.abs(lastX - event.rawX) > 20 || kotlin.math.abs(lastY - event.rawY) > 20) {
+                        mode = -1
                     }
                 }
                 if(mode != 1) hintPosition(posToNumberPos(event.x.toInt(), event.y.toInt()))
@@ -128,40 +103,84 @@ class SimpleIME : InputMethodService() {
         true
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreateInputView(): View {
+        // Создаем основной контейнер
+        container = FrameLayout(this)
+        container.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
 
+        // Контейнер для клавиатуры теперь размещается вверху
+        val topContainer = FrameLayout(this)
+        val topParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        // Меняем gravity на TOP: клавиатура прижимается к верху экрана
+        topParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+        // Добавляем отступ сверху (опционально, для эстетики)
+        topParams.topMargin = convertDpToPixel(container.context, 40f).toInt()
+        topContainer.layoutParams = topParams
+
+        // Создаем основную клавиатуру
+        keyboardBinding = KeyboardBinding.inflate(LayoutInflater.from(this))
+        keyboardBinding.root.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        // Создаем клавиатуру подсказок
+        hintKeyboardBinding = HintKeyboardBinding.inflate(LayoutInflater.from(this))
+        val hintParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        // Подсказки будут показываться под основной клавиатурой
+        hintParams.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+        hintKeyboardBinding.root.layoutParams = hintParams
+        hintKeyboardBinding.root.visibility = View.GONE
+
+        // Собираем иерархию
+        topContainer.addView(keyboardBinding.root)
+        topContainer.addView(hintKeyboardBinding.root)
+        container.addView(topContainer)
+
+        keyboardBinding.root.setOnTouchListener(onTouchListener)
         saveFile = File(filesDir, "saveKeyBoardLayout.txt")
         loadHintArrayList()
 
-        mainParams.gravity = Gravity.BOTTOM or Gravity.CENTER
-        mainParams.x = 0
-        mainParams.y = convertDpToPixel(40.toFloat()).toInt()
+        return container
+    }
 
-        hintParams.gravity = Gravity.TOP or Gravity.CENTER
-        hintParams.x = 0
-        hintParams.y = convertDpToPixel(40.toFloat()).toInt()
-
-        keyboardBinding.root.setOnTouchListener(onTouchListener)
+    override fun onStartInputView(info: android.view.inputmethod.EditorInfo?, restarting: Boolean) {
+        super.onStartInputView(info, restarting)
+        // Обновляем положение подсказок при показе клавиатуры
+        hintKeyboardBinding.root.visibility = View.GONE
     }
 
     private fun numberPosToOriginalNumber(firstPos: Int, lastPos: Int): Int {
         return if(firstPos < lastPos) (firstPos.toString()+lastPos).toInt() else (lastPos.toString()+firstPos).toInt()
     }
+
     private fun posToNumberPos(posX: Int, posY: Int): Int {
-        if(posX < 0 || posX > keyboardBinding.root.width) return -1
-        if(posY < 0 || posY > keyboardBinding.root.height) return -1
+        val view = keyboardBinding.root
+        if(posX < 0 || posX > view.width) return -1
+        if(posY < 0 || posY > view.height) return -1
 
-        val boxWidth = keyboardBinding.root.width / 3
-        val x = if (posX in 0 until boxWidth) 1
-        else if (posX >= boxWidth && posX < boxWidth * 2) 2
-        else 3
+        val boxWidth = view.width / 3
+        val x = when {
+            posX in 0 until boxWidth -> 1
+            posX >= boxWidth && posX < boxWidth * 2 -> 2
+            else -> 3
+        }
 
-        val boxHeight = keyboardBinding.root.height / 3
-        val y = if (posY in 0 until boxHeight) 0
-        else if (posY >= boxHeight && posY < boxHeight * 2) 3
-        else 6
+        val boxHeight = view.height / 3
+        val y = when {
+            posY in 0 until boxHeight -> 0
+            posY >= boxHeight && posY < boxHeight * 2 -> 3
+            else -> 6
+        }
 
         return x + y
     }
@@ -169,13 +188,15 @@ class SimpleIME : InputMethodService() {
     private fun gestureDo(){
         if(firstId == lastId) return
         val result = hintHashMap[numberPosToOriginalNumber(firstId, lastId)] ?: return
+        val ic = currentInputConnection
+
         when(result){
-            "⌫" -> currentInputConnection.deleteSurroundingText(1, 0)
-            "˽" -> currentInputConnection.commitText(" ", 1)
-            "⏎" -> currentInputConnection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+            "⌫" -> ic?.deleteSurroundingText(1, 0)
+            "˽" -> ic?.commitText(" ", 1)
+            "⏎" -> ic?.sendKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER))
             "⤇" -> replaceKeyBoardLayoutForward()
             "⤆" -> replaceKeyBoardLayoutBack()
-            else -> currentInputConnection.commitText(result, result.length)
+            else -> ic?.commitText(result, result.length)
         }
     }
 
@@ -192,6 +213,13 @@ class SimpleIME : InputMethodService() {
         }
         if(tempArray.size == firstId - 1) tempArray.add(hintArray.size - 1)
 
+        // Показываем подсказки над клавиатурой
+        hintKeyboardBinding.root.visibility = View.VISIBLE
+
+        // Позиционируем подсказки над клавиатурой
+        val hintParams = hintKeyboardBinding.root.layoutParams as FrameLayout.LayoutParams
+        hintParams.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+
         hintKeyboardBinding.viewPos1.text = hintArray[tempArray[0]]
         hintKeyboardBinding.viewPos2.text = hintArray[tempArray[1]]
         hintKeyboardBinding.viewPos3.text = hintArray[tempArray[2]]
@@ -202,7 +230,10 @@ class SimpleIME : InputMethodService() {
         hintKeyboardBinding.viewPos8.text = hintArray[tempArray[7]]
         hintKeyboardBinding.viewPos9.text = hintArray[tempArray[8]]
     }
+
     private fun hintReturn(){
+        hintKeyboardBinding.root.visibility = View.GONE
+
         hintKeyboardBinding.viewPos1.text = "1"
         hintKeyboardBinding.viewPos2.text = "2"
         hintKeyboardBinding.viewPos3.text = "3"
@@ -215,6 +246,7 @@ class SimpleIME : InputMethodService() {
 
         hintPosition(-1)
     }
+
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun hintPosition(pos: Int){
         hintKeyboardBinding.viewPos1.background = if(pos == 1) getDrawable(R.drawable.custom_border) else null
@@ -228,29 +260,6 @@ class SimpleIME : InputMethodService() {
         hintKeyboardBinding.viewPos9.background = if(pos == 9) getDrawable(R.drawable.custom_border) else null
     }
 
-    override fun onWindowShown() {
-        super.onWindowShown()
-        show()
-    }
-
-    override fun onWindowHidden() {
-        super.onWindowHidden()
-        hide()
-    }
-
-    private fun show(){
-        if(showKeyboard) return
-        manager.addView(hintKeyboardBinding.root, hintParams)
-        manager.addView(keyboardBinding.root, mainParams)
-        showKeyboard = true
-    }
-    private fun hide(){
-        if(!showKeyboard) return
-        manager.removeView(hintKeyboardBinding.root)
-        manager.removeView(keyboardBinding.root)
-        showKeyboard = false
-    }
-
     private fun loadHintArrayList(){
         if(saveFile.exists()){
             val lines = saveFile.readLines()
@@ -261,18 +270,16 @@ class SimpleIME : InputMethodService() {
         }else saveHintArrayList()
         replaceKeyBoardLayout(keyBoardLayoutNow)
     }
+
     private fun replaceKeyBoardLayoutForward(){
         keyBoardLayoutNow++
         if(keyBoardLayoutNow > hintArrayList.size - 1) keyBoardLayoutNow = 0
         replaceKeyBoardLayout(keyBoardLayoutNow)
     }
+
     private fun replaceKeyBoardLayoutBack(){
         keyBoardLayoutNow--
         if(keyBoardLayoutNow < 0) keyBoardLayoutNow = hintArrayList.size - 1
         replaceKeyBoardLayout(keyBoardLayoutNow)
-    }
-
-    private fun convertDpToPixel(dp: Float): Float {
-        return Companion.convertDpToPixel(applicationContext, dp)
     }
 }

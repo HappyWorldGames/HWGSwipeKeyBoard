@@ -5,22 +5,13 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/draw_over_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/draw_over_other_apps"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
         android:id="@+id/turn_on_keyboard_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/turn_on_keyboard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/draw_over_button" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/select_keyboard_button"
@@ -48,4 +39,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/setting_layout_button" />
+
+    <Button
+        android:id="@+id/privacy_policy_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/privacy_policy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/learning_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

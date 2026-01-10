@@ -1,13 +1,13 @@
 package com.happyworldgames.keyboard
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.happyworldgames.keyboard.databinding.MainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -16,17 +16,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(mainBinding.root)
 
-        mainBinding.drawOverButton.setOnClickListener {
-            if (Build.VERSION.SDK_INT > 23 /*&& !Settings.canDrawOverlays(this)*/) {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName")
-                )
-                ActivityCompat.startActivityForResult(this, intent, 1, null)
-            }
+        val controller = WindowInsetsControllerCompat(window, mainBinding.root)
+        controller.isAppearanceLightStatusBars = true
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainBinding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
         }
+
         mainBinding.turnOnKeyboardButton.setOnClickListener {
             startActivity(Intent("android.settings.INPUT_METHOD_SETTINGS"))
         }
@@ -39,6 +40,9 @@ class MainActivity : AppCompatActivity() {
         }
         mainBinding.learningButton.setOnClickListener {
             startActivity(Intent(this, LearningActivity::class.java))
+        }
+        mainBinding.privacyPolicyButton.setOnClickListener {
+            startActivity(Intent(this, PrivacyPolicyActivity::class.java))
         }
     }
 

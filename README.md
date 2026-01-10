@@ -1,2 +1,2 @@
 # HWGSwipeKeyBoard
-This is SwipeKeyBoard for Android :D
+This is SwipeKeyBoard for Android.
