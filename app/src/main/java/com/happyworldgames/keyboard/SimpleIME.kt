@@ -165,6 +165,9 @@ class SimpleIME : InputMethodService() {
     private var isShifted = false
     private var isCapsLock = false
 
+    private val backspaceHandler = Handler(Looper.getMainLooper())
+    private var backspaceRunnable: Runnable? = null
+
     private var mode: Int = 0 // 0 = обычный, 1 = перемещение, -1 = запретить перемещение
     private var lastX = 0f
     var lastY = 0f
@@ -213,8 +216,8 @@ class SimpleIME : InputMethodService() {
     }
 
     private fun updateShiftKeyState() {
-        keyboardBinding.shiftButton.setShifted(isShifted)
-        keyboardBinding.shiftButton.setCapsLocked(isCapsLock)
+        (keyboardBinding.shiftButton as? ShiftKeyView)?.setShifted(isShifted)
+        (keyboardBinding.shiftButton as? ShiftKeyView)?.setCapsLocked(isCapsLock)
         if (hintKeyboardBinding.root.visibility == View.VISIBLE) {
             hintDo()
         }
@@ -257,7 +260,27 @@ class SimpleIME : InputMethodService() {
         container.addView(topContainer)
 
         keyboardBinding.control.setOnTouchListener(onTouchListener)
-        keyboardBinding.backspaceButton.setOnClickListener { currentInputConnection.deleteSurroundingText(1, 0) }
+        keyboardBinding.backspaceButton.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    currentInputConnection?.deleteSurroundingText(1, 0)
+
+                    backspaceRunnable = object : Runnable {
+                        override fun run() {
+                            currentInputConnection?.deleteSurroundingText(1, 0)
+                            backspaceHandler.postDelayed(this, 50) // Повторять каждые 50 мс
+                        }
+                    }
+                    backspaceHandler.postDelayed(backspaceRunnable!!, 500) // Начальная задержка 500 мс
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    backspaceRunnable?.let { backspaceHandler.removeCallbacks(it) }
+                    true
+                }
+                else -> false
+            }
+        }
 
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
@@ -423,6 +446,7 @@ class SimpleIME : InputMethodService() {
         keyBoardLayoutNow++
         if(keyBoardLayoutNow > hintArrayList.size - 1) keyBoardLayoutNow = 0
         replaceKeyBoardLayout(keyBoardLayoutNow)
+        // Сохраняем изменения сразу
         saveHintArrayListAsync(this)
     }
 
@@ -430,6 +454,7 @@ class SimpleIME : InputMethodService() {
         keyBoardLayoutNow--
         if(keyBoardLayoutNow < 0) keyBoardLayoutNow = hintArrayList.size - 1
         replaceKeyBoardLayout(keyBoardLayoutNow)
+        // Сохраняем изменения сразу
         saveHintArrayListAsync(this)
     }
 }
