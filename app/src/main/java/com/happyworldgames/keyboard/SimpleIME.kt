@@ -3,7 +3,10 @@ package com.happyworldgames.keyboard
 import android.annotation.SuppressLint
 import android.content.Context
 import android.inputmethodservice.InputMethodService
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.GestureDetector
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -12,25 +15,34 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.happyworldgames.keyboard.databinding.HintKeyboardBinding
 import com.happyworldgames.keyboard.databinding.KeyboardBinding
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 
 class SimpleIME : InputMethodService() {
     companion object {
+        private const val TAG = "SimpleIME"
+        private const val SAVE_FILENAME = "keyboard_layouts.json"
+
         val hintArrayList = arrayListOf<ArrayList<String>>(
             arrayListOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M", "1", "2", "3", "4", "5", "⏎", "˽", "⤆", "⤇", "⌫"),
             arrayListOf("А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "⤆", "⤇", "⌫"),
             arrayListOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", ".", "?", "!", ":", ";", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "⤆", "⤇", "⌫"),
         )
-        private lateinit var saveFile: File
+
+        lateinit var saveFile: File
+        private val mainHandler = Handler(Looper.getMainLooper())
 
         val hintArrayNumber = arrayOf(12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 45, 46, 47, 48, 49, 56, 57, 58, 59, 67, 68, 69, 78, 79, 89)
         val hintArray = arrayListOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M", "1", "2", "3", "4", "5", "6", "7", "⏎", "˽", "⌫")
         private val hintHashMap = hashMapOf<Int, String>()
+
         private fun fullHintHashMap() {
             for(i in hintArrayNumber.indices)
                 hintHashMap[hintArrayNumber[i]] = hintArray[i]
             hintArray.add(" ")
         }
+
         fun replaceKeyBoardLayout(index: Int){
             if(index > hintArrayList.size - 1) return
             hintArray.clear()
@@ -38,9 +50,110 @@ class SimpleIME : InputMethodService() {
             fullHintHashMap()
         }
 
-        fun saveHintArrayList(){
-            if(!saveFile.exists()) saveFile.createNewFile()
-            saveFile.writeText(hintArrayList.joinToString("\n") { it.joinToString() })
+        // Асинхронное сохранение в JSON формате
+        fun saveHintArrayListAsync(context: Context) {
+            Thread {
+                try {
+                    saveHintArrayListSync(context)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error saving keyboard layouts", e)
+                }
+            }.start()
+        }
+
+        // Синхронное сохранение (вызывать только в фоновом потоке)
+        private fun saveHintArrayListSync(context: Context) {
+            ensureSaveFileInitialized(context)
+
+            val json = JSONObject()
+            val layoutsArray = JSONArray()
+
+            for (layout in hintArrayList) {
+                val layoutArray = JSONArray()
+                for (key in layout) {
+                    layoutArray.put(key)
+                }
+                layoutsArray.put(layoutArray)
+            }
+
+            json.put("layouts", layoutsArray)
+            json.put("version", 1) // Для будущих миграций
+
+            saveFile.writeText(json.toString(2)) // 2 - отступ для читаемости
+            Log.d(TAG, "Keyboard layouts saved successfully")
+        }
+
+        // Асинхронная загрузка из JSON
+        fun loadHintArrayListAsync(context: Context, onLoaded: () -> Unit = {}) {
+            Thread {
+                try {
+                    ensureSaveFileInitialized(context)
+                    loadHintArrayListSync(context)
+
+                    // Обновление UI должно происходить в основном потоке
+                    mainHandler.post {
+                        onLoaded()
+                        Log.d(TAG, "Keyboard layouts loaded and UI updated")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error loading keyboard layouts", e)
+                    // В случае ошибки используем значения по умолчанию
+                    mainHandler.post {
+                        onLoaded()
+                    }
+                }
+            }.start()
+        }
+
+        // Синхронная загрузка (вызывать только в фоновом потоке)
+        private fun loadHintArrayListSync(context: Context) {
+            if (!saveFile.exists()) {
+                Log.d(TAG, "Save file not found, using default layouts")
+                return
+            }
+
+            try {
+                val jsonString = saveFile.readText()
+                if (jsonString.isEmpty()) {
+                    Log.w(TAG, "Save file is empty")
+                    return
+                }
+
+                val json = JSONObject(jsonString)
+                val version = json.optInt("version", 0)
+
+                if (json.has("layouts") && json.get("layouts") is JSONArray) {
+                    val layoutsArray = json.getJSONArray("layouts")
+                    hintArrayList.clear()
+
+                    for (i in 0 until layoutsArray.length()) {
+                        val layoutArray = layoutsArray.getJSONArray(i)
+                        val layout = ArrayList<String>()
+
+                        for (j in 0 until layoutArray.length()) {
+                            layout.add(layoutArray.getString(j))
+                        }
+
+                        if (layout.isNotEmpty()) {
+                            hintArrayList.add(layout)
+                        }
+                    }
+
+                    Log.d(TAG, "Loaded ${hintArrayList.size} layouts from JSON")
+                } else {
+                    Log.w(TAG, "Invalid JSON format - no layouts array found")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error parsing JSON file", e)
+                // В случае ошибки парсинга - оставляем текущие значения
+            }
+        }
+
+        // Инициализация файла сохранения
+        private fun ensureSaveFileInitialized(context: Context) {
+            if (!::saveFile.isInitialized) {
+                saveFile = File(context.filesDir, SAVE_FILENAME)
+            }
         }
 
         fun convertDpToPixel(context: Context, dp: Float): Float {
@@ -49,6 +162,8 @@ class SimpleIME : InputMethodService() {
     }
 
     private var keyBoardLayoutNow = 0
+    private var isShifted = false
+    private var isCapsLock = false
 
     private var mode: Int = 0 // 0 = обычный, 1 = перемещение, -1 = запретить перемещение
     private var lastX = 0f
@@ -72,8 +187,6 @@ class SimpleIME : InputMethodService() {
                 firstId = posToNumberPos(event.x.toInt(), event.y.toInt())
                 hintDo()
 
-                Log.e("HWG", "DOWN ID:$firstId")
-
                 if(firstId == 5) {
                     mode = 0
                     longClickTime = System.currentTimeMillis()
@@ -81,7 +194,6 @@ class SimpleIME : InputMethodService() {
             }
             MotionEvent.ACTION_UP -> {
                 lastId = posToNumberPos(event.x.toInt(), event.y.toInt())
-                Log.e("HWG", "UP ID:$lastId")
                 hintReturn()
                 gestureDo()
             }
@@ -100,60 +212,93 @@ class SimpleIME : InputMethodService() {
         true
     }
 
+    private fun updateShiftKeyState() {
+        keyboardBinding.shiftButton.setShifted(isShifted)
+        keyboardBinding.shiftButton.setCapsLocked(isCapsLock)
+        if (hintKeyboardBinding.root.visibility == View.VISIBLE) {
+            hintDo()
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateInputView(): View {
-        // Создаем основной контейнер
+        // ... view creation ...
         container = FrameLayout(this)
         container.layoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         )
 
-        // Контейнер для клавиатуры теперь размещается вверху
         val topContainer = FrameLayout(this)
         val topParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.WRAP_CONTENT
         )
-        // Меняем gravity на TOP: клавиатура прижимается к верху экрана
-        topParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-        // Добавляем отступ сверху (опционально, для эстетики)
-        topParams.topMargin = convertDpToPixel(container.context, 40f).toInt()
+        topParams.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+
+        val bottomMarginDp = 40f
+        topParams.bottomMargin = convertDpToPixel(container.context, bottomMarginDp).toInt()
+
         topContainer.layoutParams = topParams
 
-        // Создаем основную клавиатуру
         keyboardBinding = KeyboardBinding.inflate(LayoutInflater.from(this))
-        keyboardBinding.root.layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        )
 
-        // Создаем клавиатуру подсказок
         hintKeyboardBinding = HintKeyboardBinding.inflate(LayoutInflater.from(this))
         val hintParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT
         )
-        // Подсказки будут показываться под основной клавиатурой
         hintParams.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
         hintKeyboardBinding.root.layoutParams = hintParams
         hintKeyboardBinding.root.visibility = View.GONE
 
-        // Собираем иерархию
         topContainer.addView(keyboardBinding.root)
         topContainer.addView(hintKeyboardBinding.root)
         container.addView(topContainer)
 
-        keyboardBinding.root.setOnTouchListener(onTouchListener)
-        saveFile = File(filesDir, "saveKeyBoardLayout.txt")
-        loadHintArrayList()
+        keyboardBinding.control.setOnTouchListener(onTouchListener)
+        keyboardBinding.backspaceButton.setOnClickListener { currentInputConnection.deleteSurroundingText(1, 0) }
+
+        val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                isCapsLock = !isCapsLock
+                isShifted = isCapsLock
+                updateShiftKeyState()
+                return true
+            }
+
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                if (isCapsLock) {
+                    isCapsLock = false
+                    isShifted = false
+                } else {
+                    isShifted = !isShifted
+                }
+                updateShiftKeyState()
+                return true
+            }
+        })
+
+        keyboardBinding.shiftButton.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
+
+        loadHintArrayListAsync(this) {
+            replaceKeyBoardLayout(keyBoardLayoutNow)
+        }
 
         return container
     }
 
     override fun onStartInputView(info: android.view.inputmethod.EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        // Обновляем положение подсказок при показе клавиатуры
         hintKeyboardBinding.root.visibility = View.GONE
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        saveHintArrayListAsync(this)
     }
 
     private fun numberPosToOriginalNumber(firstPos: Int, lastPos: Int): Int {
@@ -161,21 +306,21 @@ class SimpleIME : InputMethodService() {
     }
 
     private fun posToNumberPos(posX: Int, posY: Int): Int {
-        val view = keyboardBinding.root
+        val view = keyboardBinding.control
         if(posX < 0 || posX > view.width) return -1
         if(posY < 0 || posY > view.height) return -1
 
         val boxWidth = view.width / 3
         val x = when {
             posX in 0 until boxWidth -> 1
-            posX >= boxWidth && posX < boxWidth * 2 -> 2
+            posX < boxWidth * 2 -> 2
             else -> 3
         }
 
         val boxHeight = view.height / 3
         val y = when {
             posY in 0 until boxHeight -> 0
-            posY >= boxHeight && posY < boxHeight * 2 -> 3
+            posY < boxHeight * 2 -> 3
             else -> 6
         }
 
@@ -193,7 +338,15 @@ class SimpleIME : InputMethodService() {
             "⏎" -> ic?.sendKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER))
             "⤇" -> replaceKeyBoardLayoutForward()
             "⤆" -> replaceKeyBoardLayoutBack()
-            else -> ic?.commitText(result, result.length)
+            else -> {
+                val textToCommit = if (isShifted || isCapsLock) result.uppercase() else result.lowercase()
+                ic?.commitText(textToCommit, 1)
+
+                if (isShifted && !isCapsLock) {
+                    isShifted = false
+                    updateShiftKeyState()
+                }
+            }
         }
     }
 
@@ -210,22 +363,31 @@ class SimpleIME : InputMethodService() {
         }
         if(tempArray.size == firstId - 1) tempArray.add(hintArray.size - 1)
 
-        // Показываем подсказки над клавиатурой
         hintKeyboardBinding.root.visibility = View.VISIBLE
 
-        // Позиционируем подсказки над клавиатурой
         val hintParams = hintKeyboardBinding.root.layoutParams as FrameLayout.LayoutParams
         hintParams.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
 
-        hintKeyboardBinding.viewPos1.text = hintArray[tempArray[0]]
-        hintKeyboardBinding.viewPos2.text = hintArray[tempArray[1]]
-        hintKeyboardBinding.viewPos3.text = hintArray[tempArray[2]]
-        hintKeyboardBinding.viewPos4.text = hintArray[tempArray[3]]
-        hintKeyboardBinding.viewPos5.text = hintArray[tempArray[4]]
-        hintKeyboardBinding.viewPos6.text = hintArray[tempArray[5]]
-        hintKeyboardBinding.viewPos7.text = hintArray[tempArray[6]]
-        hintKeyboardBinding.viewPos8.text = hintArray[tempArray[7]]
-        hintKeyboardBinding.viewPos9.text = hintArray[tempArray[8]]
+        val isCaseUp = isShifted || isCapsLock
+
+        fun getHintText(index: Int): CharSequence {
+            val text = hintArray[tempArray[index]]
+            return if (text.length == 1 && text[0].isLetter()) {
+                if (isCaseUp) text.uppercase() else text.lowercase()
+            } else {
+                text
+            }
+        }
+
+        hintKeyboardBinding.viewPos1.text = getHintText(0)
+        hintKeyboardBinding.viewPos2.text = getHintText(1)
+        hintKeyboardBinding.viewPos3.text = getHintText(2)
+        hintKeyboardBinding.viewPos4.text = getHintText(3)
+        hintKeyboardBinding.viewPos5.text = getHintText(4)
+        hintKeyboardBinding.viewPos6.text = getHintText(5)
+        hintKeyboardBinding.viewPos7.text = getHintText(6)
+        hintKeyboardBinding.viewPos8.text = getHintText(7)
+        hintKeyboardBinding.viewPos9.text = getHintText(8)
     }
 
     private fun hintReturn(){
@@ -257,26 +419,17 @@ class SimpleIME : InputMethodService() {
         hintKeyboardBinding.viewPos9.background = if(pos == 9) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
     }
 
-    private fun loadHintArrayList(){
-        if(saveFile.exists()){
-            val lines = saveFile.readLines()
-            hintArrayList.clear()
-            for(item in lines){
-                hintArrayList.add(ArrayList(item.splitToSequence(", ").filter { it.isNotEmpty() }.toList()))
-            }
-        }else saveHintArrayList()
-        replaceKeyBoardLayout(keyBoardLayoutNow)
-    }
-
     private fun replaceKeyBoardLayoutForward(){
         keyBoardLayoutNow++
         if(keyBoardLayoutNow > hintArrayList.size - 1) keyBoardLayoutNow = 0
         replaceKeyBoardLayout(keyBoardLayoutNow)
+        saveHintArrayListAsync(this)
     }
 
     private fun replaceKeyBoardLayoutBack(){
         keyBoardLayoutNow--
         if(keyBoardLayoutNow < 0) keyBoardLayoutNow = hintArrayList.size - 1
         replaceKeyBoardLayout(keyBoardLayoutNow)
+        saveHintArrayListAsync(this)
     }
 }

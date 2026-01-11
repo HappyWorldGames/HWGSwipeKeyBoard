@@ -12,7 +12,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -20,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.happyworldgames.keyboard.databinding.SettingKeyboardBinding
 import com.happyworldgames.keyboard.databinding.SettingKeyboardViewPagerBinding
+import java.io.File
 
 class SettingKeyBoardLayout : AppCompatActivity() {
 
@@ -27,8 +27,9 @@ class SettingKeyBoardLayout : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(settingKeyBoardViewPagerBinding.root)
+
+        SimpleIME.saveFile = File(filesDir, "saveKeyBoardLayout.txt")
 
         val controller = WindowInsetsControllerCompat(window, settingKeyBoardViewPagerBinding.root)
         controller.isAppearanceLightStatusBars = true
@@ -42,8 +43,8 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 SimpleIME.replaceKeyBoardLayout(0)
-                SimpleIME.saveHintArrayList()
-                finish()
+                SimpleIME.saveHintArrayListAsync(this@SettingKeyBoardLayout)
+                startActivity(Intent(this@SettingKeyBoardLayout, MainActivity::class.java))
             }
         })
 
@@ -51,6 +52,8 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         TabLayoutMediator(settingKeyBoardViewPagerBinding.keyLayouts, settingKeyBoardViewPagerBinding.keyLayoutView) { tab, position ->
             tab.text = "№$position"
         }.attach()
+
+        SimpleIME.loadHintArrayListAsync(this@SettingKeyBoardLayout)
     }
 
     inner class CustomViewPagerRecyclerAdapter : RecyclerView.Adapter<CustomViewPagerRecyclerAdapter.MyViewHolder>() {

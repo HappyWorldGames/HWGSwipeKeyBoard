@@ -29,7 +29,6 @@ class LearningActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.learning)
 
         val rootView = findViewById<View>(android.R.id.content)

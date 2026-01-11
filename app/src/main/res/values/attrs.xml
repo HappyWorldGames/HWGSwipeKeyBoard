@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ShiftKey">
+        <attr name="state_shifted" format="boolean" />
+        <attr name="state_capslock" format="boolean" />
+    </declare-styleable>
+</resources>

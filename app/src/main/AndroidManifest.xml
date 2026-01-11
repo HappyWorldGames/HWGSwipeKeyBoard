@@ -10,16 +10,21 @@
         android:theme="@style/Theme.KeyBoard">
 
         <activity android:name=".MainActivity"
+            android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingKeyBoardLayout"/>
-        <activity android:name=".SelectKeyLayoutActivity"/>
-        <activity android:name=".LearningActivity"/>
-        <activity android:name=".PrivacyPolicyActivity"/>
+        <activity android:name=".SettingKeyBoardLayout"
+            android:launchMode="singleTask"/>
+        <activity android:name=".SelectKeyLayoutActivity"
+            android:launchMode="singleTask"/>
+        <activity android:name=".LearningActivity"
+            android:launchMode="singleTask"/>
+        <activity android:name=".PrivacyPolicyActivity"
+            android:launchMode="singleTask"/>
 
         <service android:name=".SimpleIME"
             android:label="@string/app_name"

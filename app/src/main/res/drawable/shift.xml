@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Состояние CapsLock -->
+    <item app:state_capslock="true">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#4CAF50"/> <!-- Green for CapsLock -->
+                </shape>
+            </item>
+            <item
+                android:drawable="@drawable/ic_shift"
+                android:gravity="center" />
+        </layer-list>
+    </item>
+
+    <!-- Состояние Shift -->
+    <item app:state_shifted="true">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#2196F3"/> <!-- Blue for Shift -->
+                </shape>
+            </item>
+            <item
+                android:drawable="@drawable/ic_shift"
+                android:gravity="center" />
+        </layer-list>
+    </item>
+
+    <!-- Обычное состояние -->
+    <item>
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#616161"/> <!-- Gray -->
+                </shape>
+            </item>
+            <item
+                android:drawable="@drawable/ic_shift"
+                android:gravity="center" />
+        </layer-list>
+    </item>
+</selector>

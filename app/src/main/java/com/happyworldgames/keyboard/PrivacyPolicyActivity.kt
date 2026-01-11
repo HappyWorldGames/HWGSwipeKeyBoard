@@ -13,7 +13,6 @@ class PrivacyPolicyActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.privacy_policy_activity)
 
         val rootView = findViewById<ConstraintLayout>(R.id.root_layout)
