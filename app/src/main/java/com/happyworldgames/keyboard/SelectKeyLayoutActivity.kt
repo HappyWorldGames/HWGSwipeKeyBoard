@@ -25,8 +25,8 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
         )
         private val allSymbols = arrayListOf(
             arrayListOf("⌫", "⏎", "˽", "⤆", "⤇", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", ",", ";", ":"),
-            arrayListOf("A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f", "G", "g", "H", "h", "I", "i", "J", "j", "K", "k", "L", "l", "M", "m", "N", "n", "O", "o", "P", "p", "Q", "q", "R", "r", "S", "s", "T", "t", "U", "u", "V", "v", "W", "w", "X", "x", "Y", "y", "Z", "z"),
-            arrayListOf("А", "а", "Б", "б", "В", "в", "Г", "г", "Д", "д", "Е", "е", "Ё", "ё", "Ж", "ж", "З", "з", "И", "и", "Й", "й", "К", "к", "Л", "л", "М", "м", "Н", "н", "О", "о", "П", "п", "Р", "р", "С", "с", "Т", "т", "У", "у", "Ф", "ф", "Х", "х", "Ц", "ц", "Ч", "ч", "Ш", "ш", "Щ", "щ", "Ъ", "ъ", "Ы", "ы", "Ь", "ь", "Э", "э", "Ю", "ю", "Я", "я"),
+            arrayListOf("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"),
+            arrayListOf("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я"),
         )
     }
 
@@ -52,7 +52,12 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 SimpleIME.hintArrayList[positionArray][positionItem] = selectKeyLayoutBinding.editText.text.toString()
-                startActivity(Intent(this@SelectKeyLayoutActivity, SettingKeyBoardLayout::class.java))
+                SimpleIME.replaceKeyBoardLayout(positionArray)
+                SimpleIME.saveHintArrayListAsync(this@SelectKeyLayoutActivity)
+                startActivity(Intent(this@SelectKeyLayoutActivity, SettingKeyBoardLayout::class.java).apply {
+                    putExtra("itemPos", positionItem)
+                    putExtra("itemArray", positionArray)
+                })
             }
         })
 

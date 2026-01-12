@@ -7,6 +7,8 @@
     <string name="setting_layout">Настройка раскладки</string>
     <string name="learning">Обучение</string>
     <string name="privacy_policy">Политика конфиденциальности</string>
+    <string name="export_settings">Экспорт настроек</string>
+    <string name="import_settings">Импорт настроек</string>
     <string name="backspace">⌫</string>
     <string name="for_test">Для теста</string>
 </resources>

@@ -2,8 +2,8 @@ package com.happyworldgames.keyboard
 
 import android.content.Intent
 import android.content.res.Resources
-import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -21,6 +22,7 @@ import com.happyworldgames.keyboard.databinding.SettingKeyboardBinding
 import com.happyworldgames.keyboard.databinding.SettingKeyboardViewPagerBinding
 import java.io.File
 
+
 class SettingKeyBoardLayout : AppCompatActivity() {
 
     private val settingKeyBoardViewPagerBinding by lazy { SettingKeyboardViewPagerBinding.inflate(layoutInflater) }
@@ -29,7 +31,7 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(settingKeyBoardViewPagerBinding.root)
 
-        SimpleIME.saveFile = File(filesDir, "saveKeyBoardLayout.txt")
+        SimpleIME.saveFile = File(filesDir, "saveKeyBoardLayout.json")
 
         val controller = WindowInsetsControllerCompat(window, settingKeyBoardViewPagerBinding.root)
         controller.isAppearanceLightStatusBars = true
@@ -54,6 +56,17 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         }.attach()
 
         SimpleIME.loadHintArrayListAsync(this@SettingKeyBoardLayout)
+    }
+
+    override fun onResume() {
+        super.onResume()
+//        TODO()
+//        if (intent.extras != null) {
+//            settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyItemChanged(
+//                intent.extras!!.getInt("itemPos")
+//            )
+//        }
+        settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyDataSetChanged()
     }
 
     inner class CustomViewPagerRecyclerAdapter : RecyclerView.Adapter<CustomViewPagerRecyclerAdapter.MyViewHolder>() {
@@ -92,14 +105,14 @@ class SettingKeyBoardLayout : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
             val backgroundColor = when(position){
-                in 0..7 -> Color.parseColor("#F4511E") // 1
-                in 8..14 -> Color.parseColor("#FB8C00") // 2
-                in 14..20 -> Color.parseColor("#E53935") // 3
-                in 21..25 -> Color.parseColor("#43A047") // 4
-                in 26..29 -> Color.parseColor("#00897B") // 5
-                in 30..32 -> Color.parseColor("#1E88E5") // 6
-                in 33..34 -> Color.parseColor("#3949AB") // 7
-                else -> Color.parseColor("#8E24AA") // 8
+                in 0..7 -> "#F4511E".toColorInt() // 1
+                in 8..14 -> "#FB8C00".toColorInt() // 2
+                in 14..20 -> "#E53935".toColorInt() // 3
+                in 21..25 -> "#43A047".toColorInt() // 4
+                in 26..29 -> "#00897B".toColorInt() // 5
+                in 30..32 -> "#1E88E5".toColorInt() // 6
+                in 33..34 -> "#3949AB".toColorInt() // 7
+                else -> "#8E24AA".toColorInt() // 8
             }
 
             holder.mainLayout.setBackgroundColor(backgroundColor)

@@ -8,6 +8,8 @@
     <string name="setting_layout">Layout setup</string>
     <string name="learning">Training</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="export_settings">Export settings</string>
+    <string name="import_settings">Import settings</string>
 
     <string name="backspace">⌫</string>
 
