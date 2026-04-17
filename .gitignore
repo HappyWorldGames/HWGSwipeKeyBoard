@@ -7,6 +7,12 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+
+.idea/appInsightsSettings.xml
+.idea/migrations.xml
+.idea/codeStyles/Project.xml
+.idea/codeStyles/codeStyleConfig.xml
+
 .DS_Store
 /build
 /captures
