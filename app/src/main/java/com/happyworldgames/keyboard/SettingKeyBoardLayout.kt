@@ -31,8 +31,6 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(settingKeyBoardViewPagerBinding.root)
 
-        SimpleIME.saveFile = File(filesDir, "saveKeyBoardLayout.json")
-
         val controller = WindowInsetsControllerCompat(window, settingKeyBoardViewPagerBinding.root)
         controller.isAppearanceLightStatusBars = true
 
@@ -51,11 +49,36 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         })
 
         settingKeyBoardViewPagerBinding.keyLayoutView.adapter = CustomViewPagerRecyclerAdapter()
-        TabLayoutMediator(settingKeyBoardViewPagerBinding.keyLayouts, settingKeyBoardViewPagerBinding.keyLayoutView) { tab, position ->
+        val mediator = TabLayoutMediator(settingKeyBoardViewPagerBinding.keyLayouts, settingKeyBoardViewPagerBinding.keyLayoutView) { tab, position ->
             tab.text = "№$position"
-        }.attach()
+        }
+        mediator.attach()
 
-        SimpleIME.loadHintArrayListAsync(this@SettingKeyBoardLayout)
+        settingKeyBoardViewPagerBinding.addLayout.setOnClickListener {
+            val newLayout = ArrayList(SimpleIME.hintArrayList.lastOrNull() ?: SimpleIME.hintArrayList[0])
+            SimpleIME.hintArrayList.add(newLayout)
+            settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyItemInserted(SimpleIME.hintArrayList.size - 1)
+            settingKeyBoardViewPagerBinding.keyLayoutView.currentItem = SimpleIME.hintArrayList.size - 1
+            SimpleIME.saveHintArrayListAsync(this)
+        }
+
+        settingKeyBoardViewPagerBinding.deleteLayout.setOnClickListener {
+            if (SimpleIME.hintArrayList.size > 1) {
+                val currentItem = settingKeyBoardViewPagerBinding.keyLayoutView.currentItem
+                SimpleIME.hintArrayList.removeAt(currentItem)
+                settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyItemRemoved(currentItem)
+                SimpleIME.saveHintArrayListAsync(this)
+                // Re-attaching mediator to refresh tab names.
+                mediator.detach()
+                mediator.attach()
+            }
+        }
+
+        SimpleIME.loadHintArrayListAsync(this@SettingKeyBoardLayout) {
+            settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyDataSetChanged()
+            mediator.detach()
+            mediator.attach()
+        }
     }
 
     override fun onResume() {
