@@ -307,6 +307,10 @@ class SimpleIME : InputMethodService() {
             true
         }
 
+        keyboardBinding.spaceButton.setOnClickListener {
+            currentInputConnection?.commitText(" ", 1)
+        }
+
         keyboardBinding.layoutSwitchButton.setOnClickListener {
             replaceKeyBoardLayoutForward()
         }
