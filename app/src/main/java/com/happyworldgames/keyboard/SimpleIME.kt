@@ -307,8 +307,13 @@ class SimpleIME : InputMethodService() {
             true
         }
 
+        keyboardBinding.layoutSwitchButton.setOnClickListener {
+            replaceKeyBoardLayoutForward()
+        }
+
         loadHintArrayListAsync(this) {
             replaceKeyBoardLayout(keyBoardLayoutNow)
+            updateLayoutUI()
         }
 
         return container
@@ -442,10 +447,15 @@ class SimpleIME : InputMethodService() {
         hintKeyboardBinding.viewPos9.background = if(pos == 9) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
     }
 
+    private fun updateLayoutUI() {
+        keyboardBinding.layoutSwitchButton.text = (keyBoardLayoutNow + 1).toString()
+    }
+
     private fun replaceKeyBoardLayoutForward(){
         keyBoardLayoutNow++
         if(keyBoardLayoutNow > hintArrayList.size - 1) keyBoardLayoutNow = 0
         replaceKeyBoardLayout(keyBoardLayoutNow)
+        updateLayoutUI()
         // Сохраняем изменения сразу
         saveHintArrayListAsync(this)
     }
@@ -454,6 +464,7 @@ class SimpleIME : InputMethodService() {
         keyBoardLayoutNow--
         if(keyBoardLayoutNow < 0) keyBoardLayoutNow = hintArrayList.size - 1
         replaceKeyBoardLayout(keyBoardLayoutNow)
+        updateLayoutUI()
         // Сохраняем изменения сразу
         saveHintArrayListAsync(this)
     }
