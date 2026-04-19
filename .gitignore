@@ -12,6 +12,8 @@
 .idea/migrations.xml
 .idea/codeStyles/Project.xml
 .idea/codeStyles/codeStyleConfig.xml
+.idea/gradle.xml
+.idea/misc.xml
 
 .DS_Store
 /build
