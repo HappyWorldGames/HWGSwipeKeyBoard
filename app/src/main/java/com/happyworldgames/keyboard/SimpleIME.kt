@@ -18,6 +18,7 @@ import com.happyworldgames.keyboard.databinding.KeyboardBinding
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import androidx.core.view.isVisible
 
 class SimpleIME : InputMethodService() {
     companion object {
@@ -181,7 +182,7 @@ class SimpleIME : InputMethodService() {
     private lateinit var container: FrameLayout
 
     @SuppressLint("ClickableViewAccessibility")
-    val onTouchListener = View.OnTouchListener { v, event ->
+    val onTouchListener = View.OnTouchListener { _, event ->
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 lastX = event.rawX
@@ -216,9 +217,9 @@ class SimpleIME : InputMethodService() {
     }
 
     private fun updateShiftKeyState() {
-        (keyboardBinding.shiftButton as? ShiftKeyView)?.setShifted(isShifted)
-        (keyboardBinding.shiftButton as? ShiftKeyView)?.setCapsLocked(isCapsLock)
-        if (hintKeyboardBinding.root.visibility == View.VISIBLE) {
+        keyboardBinding.shiftButton.setShifted(isShifted)
+        keyboardBinding.shiftButton.setCapsLocked(isCapsLock)
+        if (hintKeyboardBinding.root.isVisible) {
             hintDo()
         }
     }
@@ -315,6 +316,8 @@ class SimpleIME : InputMethodService() {
             replaceKeyBoardLayoutForward()
         }
 
+        applySettings()
+
         loadHintArrayListAsync(this) {
             replaceKeyBoardLayout(keyBoardLayoutNow)
             updateLayoutUI()
@@ -323,8 +326,17 @@ class SimpleIME : InputMethodService() {
         return container
     }
 
+    private fun applySettings() {
+        val sharedPreferences = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+        keyboardBinding.backspaceButton.visibility = if (sharedPreferences.getBoolean("show_backspace", true)) View.VISIBLE else View.GONE
+        keyboardBinding.spaceButton.visibility = if (sharedPreferences.getBoolean("show_space", true)) View.VISIBLE else View.GONE
+        keyboardBinding.layoutSwitchButton.visibility = if (sharedPreferences.getBoolean("show_layout_switch", true)) View.VISIBLE else View.GONE
+        keyboardBinding.shiftButton.visibility = if (sharedPreferences.getBoolean("show_shift", true)) View.VISIBLE else View.GONE
+    }
+
     override fun onStartInputView(info: android.view.inputmethod.EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        applySettings()
         hintKeyboardBinding.root.visibility = View.GONE
     }
 
@@ -370,6 +382,10 @@ class SimpleIME : InputMethodService() {
             "⏎" -> ic?.sendKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER))
             "⤇" -> replaceKeyBoardLayoutForward()
             "⤆" -> replaceKeyBoardLayoutBack()
+            "⇧" -> {
+                isShifted = !isShifted
+                updateShiftKeyState()
+            }
             else -> {
                 val textToCommit = if (isShifted || isCapsLock) result.uppercase() else result.lowercase()
                 ic?.commitText(textToCommit, 1)
@@ -451,6 +467,7 @@ class SimpleIME : InputMethodService() {
         hintKeyboardBinding.viewPos9.background = if(pos == 9) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateLayoutUI() {
         keyboardBinding.layoutSwitchButton.text = (keyBoardLayoutNow + 1).toString()
     }

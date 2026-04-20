@@ -6,9 +6,23 @@
     <string name="select_keyboard">Выбрать клавиатуру</string>
     <string name="setting_layout">Настройка раскладки</string>
     <string name="learning">Обучение</string>
+    <string name="settings">Настройки</string>
     <string name="privacy_policy">Политика конфиденциальности</string>
     <string name="export_settings">Экспорт настроек</string>
     <string name="import_settings">Импорт настроек</string>
+
+    <string name="show_buttons_settings">Настройки видимости кнопок</string>
+    <string name="show_backspace">Показывать кнопку стирания (Backspace)</string>
+    <string name="show_space">Показывать кнопку пробела</string>
+    <string name="show_layout_switch">Показывать кнопку переключения раскладки</string>
+    <string name="show_shift">Показывать кнопку Shift</string>
+    <string name="settings_management">Управление настройками</string>
+    <string name="settings_exported">Настройки экспортированы</string>
+    <string name="settings_imported">Настройки импортированы. Перезапустите клавиатуру.</string>
+    <string name="settings_not_found">Файл настроек не найден</string>
+    <string name="error_exporting">Ошибка экспорта</string>
+    <string name="error_importing">Ошибка импорта</string>
+
     <string name="backspace">⌫</string>
     <string name="for_test">Для теста</string>
 </resources>

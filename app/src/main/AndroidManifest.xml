@@ -25,6 +25,8 @@
             android:launchMode="singleTask"/>
         <activity android:name=".PrivacyPolicyActivity"
             android:launchMode="singleTask"/>
+        <activity android:name=".SettingsActivity"
+            android:launchMode="singleTask"/>
 
         <service android:name=".SimpleIME"
             android:label="@string/app_name"
