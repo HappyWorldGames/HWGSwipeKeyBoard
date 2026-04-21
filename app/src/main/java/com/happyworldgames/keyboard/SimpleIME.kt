@@ -3,8 +3,11 @@ package com.happyworldgames.keyboard
 import android.annotation.SuppressLint
 import android.content.Context
 import android.inputmethodservice.InputMethodService
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.view.GestureDetector
 import android.view.Gravity
@@ -175,7 +178,58 @@ class SimpleIME : InputMethodService() {
     var longClickTime = System.currentTimeMillis()
 
     var firstId = -1
-    var lastId = -1
+    private var lastId = -1
+
+    private var lastVibratedPos = -1
+
+    private val vibrator: Vibrator by lazy {
+        @Suppress("DEPRECATION")
+        getSystemService(VIBRATOR_SERVICE) as Vibrator
+    }
+
+    private fun performVibration(pos: Int, isCommit: Boolean = false, isBackAction: Boolean = false) {
+        val sharedPreferences = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+        if (!sharedPreferences.getBoolean("enable_vibration", true)) return
+
+        if (!isCommit && pos == lastVibratedPos) return
+        if (!isCommit) lastVibratedPos = pos
+
+        val baseStrength = sharedPreferences.getInt("vibration_strength", 100)
+        val baseDuration = sharedPreferences.getInt("vibration_duration", 20).toLong()
+        val differentVibration = sharedPreferences.getBoolean("vibration_different", false)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val effect = when {
+                isBackAction -> VibrationEffect.createOneShot(baseDuration, baseStrength)
+                isCommit -> VibrationEffect.createOneShot(baseDuration + 10, baseStrength)
+                differentVibration && pos == 5 -> {
+                    VibrationEffect.createWaveform(
+                        longArrayOf(0, baseDuration, 40, baseDuration),
+                        intArrayOf(0, baseStrength, 0, baseStrength),
+                        -1
+                    )
+                }
+                differentVibration && pos != -1 -> {
+                    // Рассчитываем расстояние от центра (зона 5)
+                    // Зоны: 1 2 3
+                    //       4 5 6
+                    //       7 8 9
+                    val row = (pos - 1) / 3
+                    val col = (pos - 1) % 3
+                    val dist = kotlin.math.sqrt(((row - 1) * (row - 1) + (col - 1) * (col - 1)).toDouble())
+                    
+                    val zoneStrength = (baseStrength + (dist * 20)).toInt().coerceAtMost(255)
+                    val zoneDuration = baseDuration + (dist * 5).toLong()
+                    VibrationEffect.createOneShot(zoneDuration, zoneStrength)
+                }
+                else -> VibrationEffect.createOneShot(baseDuration, baseStrength)
+            }
+            vibrator.vibrate(effect)
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(if (isCommit && !isBackAction) baseDuration + 10 else baseDuration)
+        }
+    }
 
     private lateinit var keyboardBinding: KeyboardBinding
     private lateinit var hintKeyboardBinding: HintKeyboardBinding
@@ -189,6 +243,7 @@ class SimpleIME : InputMethodService() {
                 lastY = event.rawY
 
                 firstId = posToNumberPos(event.x.toInt(), event.y.toInt())
+                performVibration(firstId)
                 hintDo()
 
                 if(firstId == 5) {
@@ -200,6 +255,7 @@ class SimpleIME : InputMethodService() {
                 lastId = posToNumberPos(event.x.toInt(), event.y.toInt())
                 hintReturn()
                 gestureDo()
+                lastVibratedPos = -1
             }
             MotionEvent.ACTION_MOVE -> {
                 if(firstId == 5) {
@@ -264,10 +320,12 @@ class SimpleIME : InputMethodService() {
         keyboardBinding.backspaceButton.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    performVibration(-1, isCommit = true, isBackAction = true)
                     currentInputConnection?.deleteSurroundingText(1, 0)
 
                     backspaceRunnable = object : Runnable {
                         override fun run() {
+                            performVibration(-1, isCommit = true, isBackAction = true)
                             currentInputConnection?.deleteSurroundingText(1, 0)
                             backspaceHandler.postDelayed(this, 50) // Повторять каждые 50 мс
                         }
@@ -304,15 +362,20 @@ class SimpleIME : InputMethodService() {
         })
 
         keyboardBinding.shiftButton.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                performVibration(-1, isCommit = true)
+            }
             gestureDetector.onTouchEvent(event)
             true
         }
 
         keyboardBinding.spaceButton.setOnClickListener {
+            performVibration(-1, isCommit = true)
             currentInputConnection?.commitText(" ", 1)
         }
 
         keyboardBinding.layoutSwitchButton.setOnClickListener {
+            performVibration(-1, isCommit = true)
             replaceKeyBoardLayoutForward()
         }
 
@@ -375,6 +438,9 @@ class SimpleIME : InputMethodService() {
         if(firstId == lastId) return
         val result = hintHashMap[numberPosToOriginalNumber(firstId, lastId)] ?: return
         val ic = currentInputConnection
+
+        val isBackAction = result == "⌫" || result == "⤆"
+        performVibration(lastId, isCommit = true, isBackAction = isBackAction)
 
         when(result){
             "⌫" -> ic?.deleteSurroundingText(1, 0)
@@ -456,6 +522,7 @@ class SimpleIME : InputMethodService() {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun hintPosition(pos: Int){
+        performVibration(pos)
         hintKeyboardBinding.viewPos1.background = if(pos == 1) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
         hintKeyboardBinding.viewPos2.background = if(pos == 2) ContextCompat.getDrawable(this, R.drawable.custom_border) else null
         hintKeyboardBinding.viewPos3.background = if(pos == 3) ContextCompat.getDrawable(this, R.drawable.custom_border) else null

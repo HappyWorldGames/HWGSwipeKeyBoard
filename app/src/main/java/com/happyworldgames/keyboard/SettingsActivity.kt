@@ -3,8 +3,10 @@ package com.happyworldgames.keyboard
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.view.ViewCompat
@@ -55,6 +57,10 @@ class SettingsActivity : AppCompatActivity() {
         binding.checkboxSpace.isChecked = sharedPreferences.getBoolean("show_space", true)
         binding.checkboxLayoutSwitch.isChecked = sharedPreferences.getBoolean("show_layout_switch", true)
         binding.checkboxShift.isChecked = sharedPreferences.getBoolean("show_shift", true)
+        binding.checkboxVibration.isChecked = sharedPreferences.getBoolean("enable_vibration", true)
+        binding.checkboxVibrationDifferent.isChecked = sharedPreferences.getBoolean("vibration_different", false)
+        binding.seekbarVibrationStrength.progress = sharedPreferences.getInt("vibration_strength", 150)
+        binding.seekbarVibrationDuration.progress = sharedPreferences.getInt("vibration_duration", 30)
 
         binding.checkboxBackspace.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit { putBoolean("show_backspace", isChecked) }
@@ -68,6 +74,39 @@ class SettingsActivity : AppCompatActivity() {
         binding.checkboxShift.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit { putBoolean("show_shift", isChecked) }
         }
+        binding.checkboxVibration.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit { putBoolean("enable_vibration", isChecked) }
+        }
+        binding.checkboxVibrationDifferent.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit { putBoolean("vibration_different", isChecked) }
+        }
+
+        binding.seekbarVibrationStrength.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                sharedPreferences.edit { putInt("vibration_strength", progress) }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        binding.seekbarVibrationDuration.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                sharedPreferences.edit { putInt("vibration_duration", progress) }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        binding.resetSettingsButton.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(getString(R.string.reset_settings_title))
+                .setMessage(getString(R.string.reset_settings_confirm))
+                .setPositiveButton(getString(R.string.reset_settings_button)) { _, _ ->
+                    resetToDefaults()
+                }
+                .setNegativeButton(getString(R.string.cancel), null)
+                .show()
+        }
 
         binding.exportSettingsButton.setOnClickListener {
             exportSettingsLauncher.launch("hwg_keyboard_settings.json")
@@ -76,6 +115,32 @@ class SettingsActivity : AppCompatActivity() {
         binding.importSettingsButton.setOnClickListener {
             importSettingsLauncher.launch("application/json")
         }
+    }
+
+    private fun resetToDefaults() {
+        val sharedPreferences = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+        sharedPreferences.edit {
+            putBoolean("show_backspace", true)
+            putBoolean("show_space", true)
+            putBoolean("show_layout_switch", true)
+            putBoolean("show_shift", true)
+            putBoolean("enable_vibration", true)
+            putBoolean("vibration_different", false)
+            putInt("vibration_strength", 100) // Стандартное значение (из 255)
+            putInt("vibration_duration", 20)  // Стандартная короткая вибрация (мс)
+        }
+
+        // Обновляем UI
+        binding.checkboxBackspace.isChecked = true
+        binding.checkboxSpace.isChecked = true
+        binding.checkboxLayoutSwitch.isChecked = true
+        binding.checkboxShift.isChecked = true
+        binding.checkboxVibration.isChecked = true
+        binding.checkboxVibrationDifferent.isChecked = false
+        binding.seekbarVibrationStrength.progress = 100
+        binding.seekbarVibrationDuration.progress = 20
+
+        Toast.makeText(this, getString(R.string.settings_reset_toast), Toast.LENGTH_SHORT).show()
     }
 
     private fun exportSettings(destinationUri: Uri) {

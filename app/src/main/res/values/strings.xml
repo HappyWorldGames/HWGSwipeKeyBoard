@@ -17,6 +17,19 @@
     <string name="show_space">Show Space button</string>
     <string name="show_layout_switch">Show layout switch button</string>
     <string name="show_shift">Show Shift button</string>
+
+    <string name="vibration_settings">Vibration settings</string>
+    <string name="enable_vibration">Enable vibration</string>
+    <string name="different_vibration_per_zone">Different vibration per zone</string>
+    <string name="vibration_strength">Vibration strength</string>
+    <string name="vibration_duration">Vibration duration (ms)</string>
+    <string name="reset_settings">Reset all settings</string>
+    <string name="reset_settings_title">Reset settings</string>
+    <string name="reset_settings_confirm">Are you sure you want to reset all settings to default?</string>
+    <string name="reset_settings_button">Reset</string>
+    <string name="cancel">Cancel</string>
+    <string name="settings_reset_toast">Settings reset</string>
+
     <string name="settings_management">Settings management</string>
     <string name="settings_exported">Settings exported</string>
     <string name="settings_imported">Settings imported. Please restart the keyboard.</string>

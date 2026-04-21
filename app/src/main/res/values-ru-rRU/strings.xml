@@ -16,6 +16,19 @@
     <string name="show_space">Показывать кнопку пробела</string>
     <string name="show_layout_switch">Показывать кнопку переключения раскладки</string>
     <string name="show_shift">Показывать кнопку Shift</string>
+
+    <string name="vibration_settings">Настройки вибрации</string>
+    <string name="enable_vibration">Включить вибрацию</string>
+    <string name="different_vibration_per_zone">Разная вибрация по зонам</string>
+    <string name="vibration_strength">Сила вибрации</string>
+    <string name="vibration_duration">Длительность вибрации (мс)</string>
+    <string name="reset_settings">Сбросить все настройки</string>
+    <string name="reset_settings_title">Сброс настроек</string>
+    <string name="reset_settings_confirm">Вы уверены, что хотите сбросить все настройки до значений по умолчанию?</string>
+    <string name="reset_settings_button">Сбросить</string>
+    <string name="cancel">Отмена</string>
+    <string name="settings_reset_toast">Настройки сброшены</string>
+
     <string name="settings_management">Управление настройками</string>
     <string name="settings_exported">Настройки экспортированы</string>
     <string name="settings_imported">Настройки импортированы. Перезапустите клавиатуру.</string>
