@@ -57,6 +57,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.checkboxSpace.isChecked = sharedPreferences.getBoolean("show_space", true)
         binding.checkboxLayoutSwitch.isChecked = sharedPreferences.getBoolean("show_layout_switch", true)
         binding.checkboxShift.isChecked = sharedPreferences.getBoolean("show_shift", true)
+        binding.checkboxSymbolsOnKeys.isChecked = sharedPreferences.getBoolean("show_symbols_on_keys", true)
         binding.checkboxVibration.isChecked = sharedPreferences.getBoolean("enable_vibration", true)
         binding.checkboxVibrationDifferent.isChecked = sharedPreferences.getBoolean("vibration_different", false)
         binding.seekbarVibrationStrength.progress = sharedPreferences.getInt("vibration_strength", 150)
@@ -73,6 +74,9 @@ class SettingsActivity : AppCompatActivity() {
         }
         binding.checkboxShift.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit { putBoolean("show_shift", isChecked) }
+        }
+        binding.checkboxSymbolsOnKeys.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit { putBoolean("show_symbols_on_keys", isChecked) }
         }
         binding.checkboxVibration.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit { putBoolean("enable_vibration", isChecked) }
@@ -124,6 +128,7 @@ class SettingsActivity : AppCompatActivity() {
             putBoolean("show_space", true)
             putBoolean("show_layout_switch", true)
             putBoolean("show_shift", true)
+            putBoolean("show_symbols_on_keys", true)
             putBoolean("enable_vibration", true)
             putBoolean("vibration_different", false)
             putInt("vibration_strength", 100) // Стандартное значение (из 255)
@@ -135,6 +140,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.checkboxSpace.isChecked = true
         binding.checkboxLayoutSwitch.isChecked = true
         binding.checkboxShift.isChecked = true
+        binding.checkboxSymbolsOnKeys.isChecked = true
         binding.checkboxVibration.isChecked = true
         binding.checkboxVibrationDifferent.isChecked = false
         binding.seekbarVibrationStrength.progress = 100

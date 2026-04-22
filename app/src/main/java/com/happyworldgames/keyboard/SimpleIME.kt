@@ -278,6 +278,10 @@ class SimpleIME : InputMethodService() {
         if (hintKeyboardBinding.root.isVisible) {
             hintDo()
         }
+        val sharedPreferences = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+        if (sharedPreferences.getBoolean("show_symbols_on_keys", true)) {
+            updateSymbolsOnKeys()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -395,6 +399,79 @@ class SimpleIME : InputMethodService() {
         keyboardBinding.spaceButton.visibility = if (sharedPreferences.getBoolean("show_space", true)) View.VISIBLE else View.GONE
         keyboardBinding.layoutSwitchButton.visibility = if (sharedPreferences.getBoolean("show_layout_switch", true)) View.VISIBLE else View.GONE
         keyboardBinding.shiftButton.visibility = if (sharedPreferences.getBoolean("show_shift", true)) View.VISIBLE else View.GONE
+
+        updateSymbolsOnKeysVisibility()
+    }
+
+    private fun updateSymbolsOnKeysVisibility() {
+        val sharedPreferences = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+        val showSymbols = sharedPreferences.getBoolean("show_symbols_on_keys", true)
+        val visibility = if (showSymbols) View.VISIBLE else View.GONE
+
+        keyboardBinding.textPos1.visibility = visibility
+        keyboardBinding.textPos2.visibility = visibility
+        keyboardBinding.textPos3.visibility = visibility
+        keyboardBinding.textPos4.visibility = visibility
+        keyboardBinding.textPos5.visibility = visibility
+        keyboardBinding.textPos6.visibility = visibility
+        keyboardBinding.textPos7.visibility = visibility
+        keyboardBinding.textPos8.visibility = visibility
+        keyboardBinding.textPos9.visibility = visibility
+
+        if (showSymbols) {
+            updateSymbolsOnKeys()
+        }
+    }
+
+    private fun updateSymbolsOnKeys() {
+        val isCaseUp = isShifted || isCapsLock
+        fun formatText(text: String): String {
+            return if (text.length == 1 && text[0].isLetter()) {
+                if (isCaseUp) text.uppercase() else text.lowercase()
+            } else if (text.length > 1) {
+                text.substring(0, 1) // Берем только первый символ для компактности
+            } else text
+        }
+
+        val textViews = arrayOf(
+            keyboardBinding.textPos1, keyboardBinding.textPos2, keyboardBinding.textPos3,
+            keyboardBinding.textPos4, keyboardBinding.textPos5, keyboardBinding.textPos6,
+            keyboardBinding.textPos7, keyboardBinding.textPos8, keyboardBinding.textPos9
+        )
+
+        for (i in 0..8) {
+            val keyId = i + 1
+            val tempArray = arrayListOf<String>()
+            val placeholder = hintArray.lastOrNull() ?: " "
+
+            // Логика подбора символов как в hintDo
+            for (num in hintArrayNumber) {
+                if (tempArray.size == keyId - 1) tempArray.add(placeholder)
+                val sNum = num.toString()
+                val f = sNum.substring(0, 1).toInt()
+                val l = sNum.substring(1, 2).toInt()
+                if (f == keyId || l == keyId) {
+                    tempArray.add(hintHashMap[num] ?: "")
+                }
+            }
+            if (tempArray.size == keyId - 1) tempArray.add(placeholder)
+
+            // Формируем сетку 3x3 текстом
+            val sb = StringBuilder()
+            for (row in 0..2) {
+                for (col in 0..2) {
+                    val idx = row * 3 + col
+                    if (idx < tempArray.size) {
+                        val sym = formatText(tempArray[idx])
+                        sb.append(if (sym.isEmpty() || sym == " ") "·" else sym) // Точка для пустых мест
+                    }
+                    if (col < 2) sb.append(" ")
+                }
+                if (row < 2) sb.append("\n")
+            }
+            textViews[i].text = sb.toString()
+            textViews[i].typeface = android.graphics.Typeface.MONOSPACE
+        }
     }
 
     override fun onStartInputView(info: android.view.inputmethod.EditorInfo?, restarting: Boolean) {
@@ -537,6 +614,10 @@ class SimpleIME : InputMethodService() {
     @SuppressLint("SetTextI18n")
     private fun updateLayoutUI() {
         keyboardBinding.layoutSwitchButton.text = (keyBoardLayoutNow + 1).toString()
+        val sharedPreferences = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+        if (sharedPreferences.getBoolean("show_symbols_on_keys", true)) {
+            updateSymbolsOnKeys()
+        }
     }
 
     private fun replaceKeyBoardLayoutForward(){

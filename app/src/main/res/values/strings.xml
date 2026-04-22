@@ -17,6 +17,7 @@
     <string name="show_space">Show Space button</string>
     <string name="show_layout_switch">Show layout switch button</string>
     <string name="show_shift">Show Shift button</string>
+    <string name="show_symbols_on_keys">Show symbols on keys</string>
 
     <string name="vibration_settings">Vibration settings</string>
     <string name="enable_vibration">Enable vibration</string>

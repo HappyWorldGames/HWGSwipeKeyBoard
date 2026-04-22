@@ -51,6 +51,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/show_shift" />
 
+            <CheckBox
+                android:id="@+id/checkbox_symbols_on_keys"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/show_symbols_on_keys" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
