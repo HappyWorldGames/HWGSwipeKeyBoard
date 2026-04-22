@@ -17,6 +17,7 @@
     <string name="show_layout_switch">Показывать кнопку переключения раскладки</string>
     <string name="show_shift">Показывать кнопку Shift</string>
     <string name="show_symbols_on_keys">Показывать символы на кнопках</string>
+    <string name="keyboard_size">Размер клавиатуры</string>
 
     <string name="vibration_settings">Настройки вибрации</string>
     <string name="enable_vibration">Включить вибрацию</string>

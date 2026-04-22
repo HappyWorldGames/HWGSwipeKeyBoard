@@ -400,7 +400,104 @@ class SimpleIME : InputMethodService() {
         keyboardBinding.layoutSwitchButton.visibility = if (sharedPreferences.getBoolean("show_layout_switch", true)) View.VISIBLE else View.GONE
         keyboardBinding.shiftButton.visibility = if (sharedPreferences.getBoolean("show_shift", true)) View.VISIBLE else View.GONE
 
+        updateKeyboardSize()
         updateSymbolsOnKeysVisibility()
+    }
+
+    private fun updateKeyboardSize() {
+        val sharedPreferences = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+        val scale = sharedPreferences.getInt("keyboard_scale", 100) / 100f
+
+        val baseControlSize = convertDpToPixel(this, 120f)
+        val baseButtonSize = convertDpToPixel(this, 40f)
+
+        val newControlSize = (baseControlSize * scale).toInt()
+        val newButtonSize = (baseButtonSize * scale).toInt()
+
+        // 1. Изменяем основной контейнер
+        keyboardBinding.control.layoutParams.width = newControlSize
+        keyboardBinding.control.layoutParams.height = newControlSize
+
+        // 2. Изменяем линии (строки)
+        val lines = arrayOf(keyboardBinding.line1, keyboardBinding.line2, keyboardBinding.line3)
+        for (line in lines) {
+            line.layoutParams.height = newButtonSize
+        }
+
+        // 3. Изменяем каждую из 9 зон (FrameLayout и View внутри них)
+        val positions = arrayOf(
+            keyboardBinding.pos1, keyboardBinding.pos2, keyboardBinding.pos3,
+            keyboardBinding.pos4, keyboardBinding.pos5, keyboardBinding.pos6,
+            keyboardBinding.pos7, keyboardBinding.pos8, keyboardBinding.pos9
+        )
+
+        for (posView in positions) {
+            // Сама View (зона касания)
+            posView.layoutParams.width = newButtonSize
+            posView.layoutParams.height = newButtonSize
+            
+            // Родительский FrameLayout (чтобы TextView тоже масштабировался)
+            val parent = posView.parent as? FrameLayout
+            parent?.layoutParams?.width = newButtonSize
+            parent?.layoutParams?.height = newButtonSize
+        }
+
+        // 4. Изменяем боковые кнопки
+        val sideButtons = arrayOf(
+            keyboardBinding.layoutSwitchButton,
+            keyboardBinding.shiftButton,
+            keyboardBinding.backspaceButton,
+            keyboardBinding.spaceButton
+        )
+
+        for (button in sideButtons) {
+            button.layoutParams.width = newButtonSize
+            button.layoutParams.height = newButtonSize
+            
+            // Если это TextView (например, кнопка переключения или пробел), масштабируем шрифт
+            if (button is android.widget.TextView) {
+                val baseTextSize = if (button.id == keyboardBinding.spaceButton.id) 20f else 18f
+                button.textSize = baseTextSize * scale
+            }
+        }
+
+        // 5. Масштабируем шрифт подсказок (сетка 3x3)
+        val hintTexts = arrayOf(
+            keyboardBinding.textPos1, keyboardBinding.textPos2, keyboardBinding.textPos3,
+            keyboardBinding.textPos4, keyboardBinding.textPos5, keyboardBinding.textPos6,
+            keyboardBinding.textPos7, keyboardBinding.textPos8, keyboardBinding.textPos9
+        )
+        for (hintText in hintTexts) {
+            hintText.textSize = 7f * scale
+        }
+
+        // 6. Масштабируем всплывающую панель подсказок (hintKeyboardBinding)
+        val hintControl = hintKeyboardBinding.viewControll
+        hintControl.layoutParams.width = newControlSize
+        hintControl.layoutParams.height = newControlSize
+
+        val hintLines = arrayOf(
+            hintKeyboardBinding.viewLine1,
+            hintKeyboardBinding.viewLine2,
+            hintKeyboardBinding.viewLine3
+        )
+        for (line in hintLines) {
+            line.layoutParams.height = newButtonSize
+        }
+
+        val hintPosViews = arrayOf(
+            hintKeyboardBinding.viewPos1, hintKeyboardBinding.viewPos2, hintKeyboardBinding.viewPos3,
+            hintKeyboardBinding.viewPos4, hintKeyboardBinding.viewPos5, hintKeyboardBinding.viewPos6,
+            hintKeyboardBinding.viewPos7, hintKeyboardBinding.viewPos8, hintKeyboardBinding.viewPos9
+        )
+        for (posView in hintPosViews) {
+            posView.layoutParams.width = newButtonSize
+            posView.layoutParams.height = newButtonSize
+            posView.textSize = 20f * scale // Масштабируем шрифт во всплывающем окне (Large по умолчанию ~22sp)
+        }
+
+        keyboardBinding.root.requestLayout()
+        hintKeyboardBinding.root.requestLayout()
     }
 
     private fun updateSymbolsOnKeysVisibility() {

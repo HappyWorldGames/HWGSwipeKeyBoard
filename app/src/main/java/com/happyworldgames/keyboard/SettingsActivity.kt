@@ -62,6 +62,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.checkboxVibrationDifferent.isChecked = sharedPreferences.getBoolean("vibration_different", false)
         binding.seekbarVibrationStrength.progress = sharedPreferences.getInt("vibration_strength", 150)
         binding.seekbarVibrationDuration.progress = sharedPreferences.getInt("vibration_duration", 30)
+        binding.seekbarKeyboardSize.progress = sharedPreferences.getInt("keyboard_scale", 100)
 
         binding.checkboxBackspace.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit { putBoolean("show_backspace", isChecked) }
@@ -101,6 +102,16 @@ class SettingsActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        binding.seekbarKeyboardSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                // Ограничим минимальный размер 50%
+                val scale = if (progress < 50) 50 else progress
+                sharedPreferences.edit { putInt("keyboard_scale", scale) }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
         binding.resetSettingsButton.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_settings_title))
@@ -133,6 +144,7 @@ class SettingsActivity : AppCompatActivity() {
             putBoolean("vibration_different", false)
             putInt("vibration_strength", 100) // Стандартное значение (из 255)
             putInt("vibration_duration", 20)  // Стандартная короткая вибрация (мс)
+            putInt("keyboard_scale", 100)
         }
 
         // Обновляем UI
@@ -145,6 +157,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.checkboxVibrationDifferent.isChecked = false
         binding.seekbarVibrationStrength.progress = 100
         binding.seekbarVibrationDuration.progress = 20
+        binding.seekbarKeyboardSize.progress = 100
 
         Toast.makeText(this, getString(R.string.settings_reset_toast), Toast.LENGTH_SHORT).show()
     }
