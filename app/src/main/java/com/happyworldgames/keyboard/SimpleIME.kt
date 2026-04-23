@@ -179,6 +179,8 @@ class SimpleIME : InputMethodService() {
 
     var firstId = -1
     private var lastId = -1
+    private var lastHintId = -1
+    private val touchSlop by lazy { android.view.ViewConfiguration.get(this).scaledTouchSlop }
 
     private var lastVibratedPos = -1
 
@@ -235,38 +237,118 @@ class SimpleIME : InputMethodService() {
     private lateinit var hintKeyboardBinding: HintKeyboardBinding
     private lateinit var container: FrameLayout
 
+    private fun commitResult(result: String) {
+        val ic = currentInputConnection
+        val isBackAction = result == "⌫" || result == "⤆"
+        performVibration(-1, isCommit = true, isBackAction = isBackAction)
+
+        when (result) {
+            "⌫" -> ic?.deleteSurroundingText(1, 0)
+            "˽" -> ic?.commitText(" ", 1)
+            "⏎" -> ic?.sendKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER))
+            "⤇" -> replaceKeyBoardLayoutForward()
+            "⤆" -> replaceKeyBoardLayoutBack()
+            "⇧" -> {
+                isShifted = !isShifted
+                updateShiftKeyState()
+            }
+            else -> {
+                // Обработка регистра для одиночных букв
+                val textToCommit = if (result.length == 1 && result[0].isLetter()) {
+                    if (isShifted || isCapsLock) result.uppercase() else result.lowercase()
+                } else {
+                    result
+                }
+                ic?.commitText(textToCommit, 1)
+
+                if (isShifted && !isCapsLock) {
+                    isShifted = false
+                    updateShiftKeyState()
+                }
+            }
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     val onTouchListener = View.OnTouchListener { _, event ->
+        val currentId = posToNumberPos(event.x.toInt(), event.y.toInt())
+        
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 lastX = event.rawX
                 lastY = event.rawY
-
-                firstId = posToNumberPos(event.x.toInt(), event.y.toInt())
-                performVibration(firstId)
-                hintDo()
-
-                if(firstId == 5) {
-                    mode = 0
+                firstId = currentId
+                
+                mode = 0
+                if (firstId == 5) {
                     longClickTime = System.currentTimeMillis()
+                }
+
+                performVibration(firstId)
+                
+                // Если нажали на ту же кнопку, что открыла меню - просто подсвечиваем её
+                // Если на новую - показываем подсказки для новой (для жеста), 
+                // но сохраняем возможность тапа для старой
+                if (lastHintId == -1 || lastHintId == firstId) {
+                    hintDo()
+                } else {
+                    hintPosition(firstId)
                 }
             }
             MotionEvent.ACTION_UP -> {
-                lastId = posToNumberPos(event.x.toInt(), event.y.toInt())
-                hintReturn()
-                gestureDo()
+                lastId = currentId
+                
+                val sharedPreferences = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+                val enableTapInput = sharedPreferences.getBoolean("enable_tap_input", false)
+
+                val isTap = firstId == lastId && mode == 0
+                
+                if (enableTapInput && isTap && firstId != -1) {
+                    if (lastHintId != -1 && lastHintId != firstId) {
+                        // Выбор символа вторым тапом
+                        val result = hintHashMap[numberPosToOriginalNumber(lastHintId, firstId)]
+                        if (result != null) commitResult(result)
+                        hintReturn()
+                    } else if (lastHintId == firstId) {
+                        // Повторный тап по той же кнопке закрывает меню
+                        hintReturn()
+                    } else {
+                        // Первый тап открывает "липкое" меню
+                        lastHintId = firstId
+                        hintDo() // Обновляем текст подсказок именно для этой кнопки
+                    }
+                } else {
+                    // Обычный жест или тап при выключенной опции
+                    if (!isTap) gestureDo()
+                    hintReturn()
+                }
                 lastVibratedPos = -1
             }
             MotionEvent.ACTION_MOVE -> {
-                if(firstId == 5) {
-                    if (longClickTime + 1000 < System.currentTimeMillis() && mode == 0){
+                val dx = event.rawX - lastX
+                val dy = event.rawY - lastY
+                val distance = kotlin.math.sqrt((dx * dx + dy * dy).toDouble())
+
+                // Логика перемещения клавиатуры (центр)
+                if (firstId == 5 && mode != -1) {
+                    if (longClickTime + 1000 < System.currentTimeMillis() && mode == 0) {
                         mode = 1
                         hintReturn()
-                    }else if (kotlin.math.abs(lastX - event.rawX) > 20 || kotlin.math.abs(lastY - event.rawY) > 20) {
+                    } else if (distance > touchSlop) {
                         mode = -1
                     }
                 }
-                if(mode != 1) hintPosition(posToNumberPos(event.x.toInt(), event.y.toInt()))
+
+                if (mode != 1) {
+                    if (distance > touchSlop) {
+                        // Если это движение, а не тап - переключаемся в режим жеста
+                        if (lastHintId != -1 && lastHintId != firstId) {
+                            lastHintId = -1
+                            hintDo() // Показываем подсказки именно для текущего первого нажатия
+                        }
+                    }
+                    hintPosition(currentId)
+                }
             }
         }
         true
@@ -611,31 +693,7 @@ class SimpleIME : InputMethodService() {
     private fun gestureDo(){
         if(firstId == lastId) return
         val result = hintHashMap[numberPosToOriginalNumber(firstId, lastId)] ?: return
-        val ic = currentInputConnection
-
-        val isBackAction = result == "⌫" || result == "⤆"
-        performVibration(lastId, isCommit = true, isBackAction = isBackAction)
-
-        when(result){
-            "⌫" -> ic?.deleteSurroundingText(1, 0)
-            "˽" -> ic?.commitText(" ", 1)
-            "⏎" -> ic?.sendKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER))
-            "⤇" -> replaceKeyBoardLayoutForward()
-            "⤆" -> replaceKeyBoardLayoutBack()
-            "⇧" -> {
-                isShifted = !isShifted
-                updateShiftKeyState()
-            }
-            else -> {
-                val textToCommit = if (isShifted || isCapsLock) result.uppercase() else result.lowercase()
-                ic?.commitText(textToCommit, 1)
-
-                if (isShifted && !isCapsLock) {
-                    isShifted = false
-                    updateShiftKeyState()
-                }
-            }
-        }
+        commitResult(result)
     }
 
     private fun hintDo(){
@@ -680,6 +738,7 @@ class SimpleIME : InputMethodService() {
 
     private fun hintReturn(){
         hintKeyboardBinding.root.visibility = View.GONE
+        lastHintId = -1
 
         hintKeyboardBinding.viewPos1.text = "1"
         hintKeyboardBinding.viewPos2.text = "2"

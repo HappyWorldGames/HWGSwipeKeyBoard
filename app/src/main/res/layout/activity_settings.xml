@@ -57,6 +57,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/show_symbols_on_keys" />
 
+            <CheckBox
+                android:id="@+id/checkbox_tap_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_tap_input" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
