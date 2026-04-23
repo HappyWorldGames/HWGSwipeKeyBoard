@@ -2,6 +2,7 @@ package com.happyworldgames.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.os.Handler
@@ -31,7 +32,8 @@ class SimpleIME : InputMethodService() {
         val hintArrayList = arrayListOf<ArrayList<String>>(
             arrayListOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M", "1", "2", "3", "4", "5", "⏎", "˽", "⤆", "⤇", "⌫"),
             arrayListOf("А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "⤆", "⤇", "⌫"),
-            arrayListOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", ".", "?", "!", ":", ";", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "⤆", "⤇", "⌫"),
+            arrayListOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", ".", "?", "!", ":", ";", "(", ")", "\"", "'", "@", "#", "%", "&", "*", "/", "\\", "-", "+", "=", "_", "⏎", "˽", "⤆", "⤇", "⌫"),
+            arrayListOf("⚙️", "❌", "⇧", "⏎", "˽", "⌫", "⤆", "⤇", "!", "?", ".", ",", ":", ";", "(", ")", "[", "]", "{", "}", "<", ">", "@", "#", "$", "%", "^", "&", "*", "-", "+", "=", "/", "\\", "|", "~"),
         )
 
         lateinit var saveFile: File
@@ -239,7 +241,7 @@ class SimpleIME : InputMethodService() {
 
     private fun commitResult(result: String) {
         val ic = currentInputConnection
-        val isBackAction = result == "⌫" || result == "⤆"
+        val isBackAction = result == "⌫" || result == "⤆" || result == "❌"
         performVibration(-1, isCommit = true, isBackAction = isBackAction)
 
         when (result) {
@@ -252,6 +254,12 @@ class SimpleIME : InputMethodService() {
                 isShifted = !isShifted
                 updateShiftKeyState()
             }
+            "⚙️" -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            }
+            "❌" -> requestHideSelf(0)
             else -> {
                 // Обработка регистра для одиночных букв
                 val textToCommit = if (result.length == 1 && result[0].isLetter()) {
