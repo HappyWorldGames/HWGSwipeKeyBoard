@@ -41,4 +41,22 @@
 
     <string name="backspace">⌫</string>
     <string name="for_test">Для теста</string>
+    <string name="learn_welcome">Добро пожаловать! Это руководство покажет, как печатать свайпами. Посмотрите на визуализатор ниже, чтобы увидеть зоны.</string>
+    <string name="learn_intro">Каждое действие — это свайп между номерами зон. Базовые действия удобно начинать из центра (5).</string>
+    <string name="visualizer_label">Визуализатор клавиатуры:</string>
+    <string name="learn_step_a">Посмотрите, как вводится \'А\': проведите от зоны 1 к 2.</string>
+    <string name="learn_step_space">Для ввода Пробела проведите из центра (5) вниз к 8. Следите за стрелкой.</string>
+    <string name="learn_step_backspace">Чтобы стереть (Backspace), проведите из 5 в 4. Посмотрите на движение.</string>
+    <string name="learn_step_shift">Для заглавных букв (Shift) проведите из 5 вверх к 2. Вот так.</string>
+    <string name="learn_step_layout">Для смены раскладки проведите из 5 в 9. Следите за анимацией.</string>
+    <string name="learn_step_side_buttons">Вы также можете использовать боковые кнопки для быстрых действий: Shift, Смена раскладки, Backspace и Пробел. Они всегда под рукой!</string>
+    <string name="learn_step_finished">Отлично! Вы освоили основы. Можете потренироваться еще в этом окне.</string>
+    <string name="learn_try_it">Попробовать</string>
+    <string name="learn_now_try">Теперь вы!</string>
+    <string name="learn_keyboard_not_selected">Клавиатура Swipe не выбрана. Пожалуйста, выберите её, чтобы продолжить обучение.</string>
+    <string name="learn_keyboard_not_enabled">Клавиатура Swipe не включена. Пожалуйста, включите её в настройках.</string>
+    <string name="next">Далее</string>
+    <string name="layout_tutorial_desc">Каждая карточка — это свайп между зонами. Свайп между ними выполняет действие. Нажмите на карточку, чтобы изменить её функцию.</string>
+    <string name="layout_tutorial_got_it">Понятно!</string>
+    <string name="layout_tutorial_skip">Я уже всё знаю, отстань</string>
 </resources>

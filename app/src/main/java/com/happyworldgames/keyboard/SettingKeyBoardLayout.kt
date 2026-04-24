@@ -1,5 +1,6 @@
 package com.happyworldgames.keyboard
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
@@ -38,6 +39,22 @@ class SettingKeyBoardLayout : AppCompatActivity() {
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
             windowInsets
+        }
+
+        // Check if tutorial should be shown
+        val prefs = getSharedPreferences("keyboard_prefs", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("layout_tutorial_shown", false)) {
+            settingKeyBoardViewPagerBinding.tutorialOverlay.visibility = View.VISIBLE
+        }
+
+        settingKeyBoardViewPagerBinding.btnGotIt.setOnClickListener {
+            settingKeyBoardViewPagerBinding.tutorialOverlay.visibility = View.GONE
+            prefs.edit().putBoolean("layout_tutorial_shown", true).apply()
+        }
+
+        settingKeyBoardViewPagerBinding.btnSkipTutorial.setOnClickListener {
+            settingKeyBoardViewPagerBinding.tutorialOverlay.visibility = View.GONE
+            prefs.edit().putBoolean("layout_tutorial_shown", true).apply()
         }
 
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {

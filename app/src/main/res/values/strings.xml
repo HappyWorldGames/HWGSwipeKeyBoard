@@ -42,4 +42,22 @@
 
     <string name="backspace">⌫</string>
     <string name="for_test">For Test</string>
+    <string name="learn_welcome">Welcome! This guide will show you how to type with swipes. Look at the visualizer below to see the zones.</string>
+    <string name="learn_intro">Each action is a swipe between two numbered zones. Most basic actions can start from the center (5).</string>
+    <string name="visualizer_label">Keyboard Visualizer:</string>
+    <string name="learn_step_a">Watch how to type \'A\': swipe from zone 1 to zone 2.</string>
+    <string name="learn_step_space">To type a Space, swipe from 5 down to 8. Watch the demo below.</string>
+    <string name="learn_step_backspace">To erase (Backspace), swipe from 5 to 4. Watch the arrow move.</string>
+    <string name="learn_step_shift">For uppercase (Shift), swipe from 5 up to 2. See how it\'s done.</string>
+    <string name="learn_step_layout">To switch layout, swipe from 5 to 9. Look at the visualizer.</string>
+    <string name="learn_step_side_buttons">You can also use side buttons for quick actions: Shift, Layout switch, Backspace, and Space. They are always at hand!</string>
+    <string name="learn_step_finished">Excellent! You\'ve learned the basics. Practice more in this window.</string>
+    <string name="learn_try_it">Try it</string>
+    <string name="learn_now_try">Now you try!</string>
+    <string name="learn_keyboard_not_selected">The Swipe Keyboard is not selected. Please select it to proceed with the interactive tutorial.</string>
+    <string name="learn_keyboard_not_enabled">The Swipe Keyboard is not enabled. Please enable it in settings first.</string>
+    <string name="next">Next</string>
+    <string name="layout_tutorial_desc">Each card shows a swipe between two zones. Swiping between them performs the action. Click any card to change its function.</string>
+    <string name="layout_tutorial_got_it">Got it!</string>
+    <string name="layout_tutorial_skip">I already know everything</string>
 </resources>
