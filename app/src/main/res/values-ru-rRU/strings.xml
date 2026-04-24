@@ -40,6 +40,12 @@
     <string name="error_importing">Ошибка импорта</string>
 
     <string name="backspace">⌫</string>
+    <string name="symbols">Символы</string>
+    <string name="manage_languages">Управление языками</string>
+    <string name="category_management">Управление</string>
+    <string name="category_digits">Цифры</string>
+    <string name="category_punctuation">Пунктуация</string>
+    <string name="category_symbols_math">Символы и Математика</string>
     <string name="for_test">Для теста</string>
     <string name="learn_welcome">Добро пожаловать! Это руководство покажет, как печатать свайпами. Посмотрите на визуализатор ниже, чтобы увидеть зоны.</string>
     <string name="learn_intro">Каждое действие — это свайп между номерами зон. Базовые действия удобно начинать из центра (5).</string>
@@ -56,7 +62,17 @@
     <string name="learn_keyboard_not_selected">Клавиатура Swipe не выбрана. Пожалуйста, выберите её, чтобы продолжить обучение.</string>
     <string name="learn_keyboard_not_enabled">Клавиатура Swipe не включена. Пожалуйста, включите её в настройках.</string>
     <string name="next">Далее</string>
-    <string name="layout_tutorial_desc">Каждая карточка — это свайп между зонами. Свайп между ними выполняет действие. Нажмите на карточку, чтобы изменить её функцию.</string>
+    <string name="layout_tutorial_desc">Каждая карточка — это свайп между зонами. Нажмите на карточку, чтобы изменить её функцию.\n\nИспользуйте кнопки вверху справа, чтобы добавить новые языки или изменить порядок/удалить текущие раскладки.</string>
+    <string name="manage_layouts_hint">Зажмите и тяните элементы, чтобы изменить порядок. Смахните влево или вправо для удаления.</string>
+    <string name="delete_confirm_title">Удалить раскладку?</string>
+    <string name="delete_confirm_msg">Вы уверены, что хотите удалить эту раскладку?</string>
     <string name="layout_tutorial_got_it">Понятно!</string>
+    <string name="add_layout_title">Добавить раскладку</string>
+    <string name="add_layout_copy">Копировать текущую</string>
+    <string name="add_layout_predefined">Готовый язык</string>
+    <string name="select_language">Выберите язык</string>
+    <string name="manage_layouts">Управление раскладками</string>
+    <string name="delete">Удалить</string>
+    <string name="layout_n">Раскладка №%1$d</string>
     <string name="layout_tutorial_skip">Я уже всё знаю, отстань</string>
 </resources>

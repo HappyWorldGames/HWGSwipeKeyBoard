@@ -29,19 +29,19 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
 
     companion object {
         // Базовый набор символов с категориями
-        private val symbolsWithHeaders = arrayListOf(
-            SymbolItem.Header("Управление"),
+        private fun getSymbolsWithHeaders(resources: Resources) = arrayListOf(
+            SymbolItem.Header(resources.getString(R.string.category_management)),
             SymbolItem.Symbol("⚙️"), SymbolItem.Symbol("❌"), SymbolItem.Symbol("⌫"), 
             SymbolItem.Symbol("⏎"), SymbolItem.Symbol("˽"), SymbolItem.Symbol("⤆"), 
             SymbolItem.Symbol("⤇"), SymbolItem.Symbol("⇧"),
             
-            SymbolItem.Header("Цифры"),
+            SymbolItem.Header(resources.getString(R.string.category_digits)),
             SymbolItem.Symbol("1"), SymbolItem.Symbol("2"), SymbolItem.Symbol("3"), 
             SymbolItem.Symbol("4"), SymbolItem.Symbol("5"), SymbolItem.Symbol("6"), 
             SymbolItem.Symbol("7"), SymbolItem.Symbol("8"), SymbolItem.Symbol("9"), 
             SymbolItem.Symbol("0"),
             
-            SymbolItem.Header("Пунктуация"),
+            SymbolItem.Header(resources.getString(R.string.category_punctuation)),
             SymbolItem.Symbol("."), SymbolItem.Symbol(","), SymbolItem.Symbol("!"), 
             SymbolItem.Symbol("?"), SymbolItem.Symbol(";"), SymbolItem.Symbol(":"), 
             SymbolItem.Symbol("\""), SymbolItem.Symbol("'"), SymbolItem.Symbol("("), 
@@ -49,7 +49,7 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
             SymbolItem.Symbol("{"), SymbolItem.Symbol("}"), SymbolItem.Symbol("<"), 
             SymbolItem.Symbol(">"), SymbolItem.Symbol("«"), SymbolItem.Symbol("»"),
             
-            SymbolItem.Header("Символы и Математика"),
+            SymbolItem.Header(resources.getString(R.string.category_symbols_math)),
             SymbolItem.Symbol("@"), SymbolItem.Symbol("#"), SymbolItem.Symbol("$"), 
             SymbolItem.Symbol("€"), SymbolItem.Symbol("%"), SymbolItem.Symbol("&"), 
             SymbolItem.Symbol("*"), SymbolItem.Symbol("-"), SymbolItem.Symbol("+"), 
@@ -58,12 +58,25 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
             SymbolItem.Symbol("×"), SymbolItem.Symbol("÷"), SymbolItem.Symbol("°")
         )
 
-        // Языки (в будущем их можно фильтровать на основе настроек)
-        private val languages = arrayListOf(
+        // Все доступные языки
+        private val allLanguages = arrayListOf(
             "English" to arrayListOf("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"),
-            "Russia" to arrayListOf("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я")
+            "Русский" to arrayListOf("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я"),
+            "Українська" to arrayListOf("а", "б", "в", "г", "ґ", "д", "е", "є", "ж", "з", "и", "і", "ї", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ь", "ю", "я"),
+            "Deutsch" to arrayListOf("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "ä", "ö", "ü", "ß"),
+            "Español" to arrayListOf("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "ñ", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"),
+            "Français" to arrayListOf("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "à", "â", "æ", "ç", "é", "è", "ê", "ë", "î", "ï", "ô", "œ", "ù", "û", "ü", "ÿ"),
+            "Italiano" to arrayListOf("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "à", "è", "é", "ì", "í", "î", "ò", "ó", "ù", "ú"),
+            "Português" to arrayListOf("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "á", "â", "ã", "à", "ç", "é", "ê", "í", "ó", "ô", "õ", "ú"),
+            "Polski" to arrayListOf("a", "ą", "b", "c", "ć", "d", "e", "ę", "f", "g", "h", "i", "j", "k", "l", "ł", "m", "n", "ń", "o", "ó", "p", "q", "r", "s", "ś", "t", "u", "v", "w", "x", "y", "z", "ź", "ż"),
+            "Қазақша" to arrayListOf("а", "ә", "б", "в", "г", "ғ", "д", "е", "ё", "ж", "з", "и", "й", "к", "қ", "л", "м", "н", "ң", "о", "ө", "п", "р", "с", "т", "у", "ұ", "ү", "ф", "х", "һ", "ц", "ч", "ш", "щ", "ъ", "ы", "і", "ь", "э", "ю", "я"),
+            "Беларуская" to arrayListOf("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "і", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ў", "ф", "х", "ц", "ч", "ш", "ы", "ь", "э", "ю", "я"),
+            "Türkçe" to arrayListOf("a", "b", "c", "ç", "d", "e", "f", "g", "ğ", "h", "ı", "i", "j", "k", "l", "m", "n", "o", "ö", "p", "r", "s", "ş", "t", "u", "ü", "v", "y", "z")
         )
     }
+
+    private val activeLanguages = arrayListOf<Pair<String, ArrayList<String>>>()
+    private val symbolsWithHeaders by lazy { getSymbolsWithHeaders(resources) }
 
     private val selectKeyLayoutBinding by lazy { SelectKeyLayoutBinding.inflate(layoutInflater) }
     private val positionArray by lazy { intent.getIntExtra("array", -1) }
@@ -79,6 +92,8 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
             view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
             windowInsets
         }
+
+        loadActiveLanguages()
 
         if(positionItem == -1 || positionArray == -1) return
         selectKeyLayoutBinding.editText.setText(SimpleIME.hintArrayList[positionArray][positionItem])
@@ -99,8 +114,12 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
 
         selectKeyLayoutBinding.viewpager.adapter = CustomViewPagerRecyclerAdapter()
         TabLayoutMediator(selectKeyLayoutBinding.tabLayout, selectKeyLayoutBinding.viewpager) { tab, position ->
-            tab.text = if (position == 0) "Symbols" else languages[position - 1].first
+            tab.text = if (position == 0) getString(R.string.symbols) else activeLanguages[position - 1].first
         }.attach()
+
+        selectKeyLayoutBinding.manageLanguages.setOnClickListener {
+            showLanguageSelectionDialog()
+        }
 
         selectKeyLayoutBinding.backspace.setOnClickListener {
             val cursorPosition: Int = selectKeyLayoutBinding.editText.selectionStart
@@ -113,6 +132,45 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
                 selectKeyLayoutBinding.editText.text = selectKeyLayoutBinding.editText.text.delete(length - 1, length)
             }
         }
+    }
+
+    private fun loadActiveLanguages() {
+        val prefs = getSharedPreferences("keyboard_prefs", MODE_PRIVATE)
+        val saved = prefs.getStringSet("active_languages", setOf("English", "Русский")) ?: setOf("English", "Русский")
+        activeLanguages.clear()
+        activeLanguages.addAll(allLanguages.filter { it.first in saved })
+    }
+
+    private fun saveActiveLanguages() {
+        val prefs = getSharedPreferences("keyboard_prefs", MODE_PRIVATE)
+        prefs.edit().putStringSet("active_languages", activeLanguages.map { it.first }.toSet()).apply()
+    }
+
+    private fun showLanguageSelectionDialog() {
+        val languageNames = allLanguages.map { it.first }.toTypedArray()
+        val checkedItems = languageNames.map { name -> activeLanguages.any { it.first == name } }.toBooleanArray()
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.manage_languages)
+            .setMultiChoiceItems(languageNames, checkedItems) { _, which, isChecked ->
+                checkedItems[which] = isChecked
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                activeLanguages.clear()
+                for (i in languageNames.indices) {
+                    if (checkedItems[i]) {
+                        allLanguages.find { it.first == languageNames[i] }?.let { activeLanguages.add(it) }
+                    }
+                }
+                saveActiveLanguages()
+                selectKeyLayoutBinding.viewpager.adapter?.notifyDataSetChanged()
+                // Перепривязываем TabLayoutMediator
+                TabLayoutMediator(selectKeyLayoutBinding.tabLayout, selectKeyLayoutBinding.viewpager) { tab, position ->
+                    tab.text = if (position == 0) getString(R.string.symbols) else activeLanguages[position - 1].first
+                }.attach()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     inner class CustomViewPagerRecyclerAdapter : RecyclerView.Adapter<CustomViewPagerRecyclerAdapter.MyViewHolder>() {
@@ -142,12 +200,12 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
                 holder.main.symbolsRecyclerView.adapter = SymbolsWithHeadersAdapter(symbolsWithHeaders)
             } else {
                 holder.main.symbolsRecyclerView.layoutManager = layoutManager
-                val langSymbols = languages[currentPos - 1].second.map { SymbolItem.Symbol(it) }
+                val langSymbols = activeLanguages[currentPos - 1].second.map { SymbolItem.Symbol(it) }
                 holder.main.symbolsRecyclerView.adapter = SymbolsWithHeadersAdapter(langSymbols)
             }
         }
 
-        override fun getItemCount(): Int = 1 + languages.size
+        override fun getItemCount(): Int = 1 + activeLanguages.size
     }
 
     inner class SymbolsWithHeadersAdapter(private val items: List<SymbolItem>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

@@ -41,6 +41,12 @@
     <string name="error_importing">Error importing settings</string>
 
     <string name="backspace">⌫</string>
+    <string name="symbols">Symbols</string>
+    <string name="manage_languages">Manage Languages</string>
+    <string name="category_management">Management</string>
+    <string name="category_digits">Digits</string>
+    <string name="category_punctuation">Punctuation</string>
+    <string name="category_symbols_math">Symbols and Math</string>
     <string name="for_test">For Test</string>
     <string name="learn_welcome">Welcome! This guide will show you how to type with swipes. Look at the visualizer below to see the zones.</string>
     <string name="learn_intro">Each action is a swipe between two numbered zones. Most basic actions can start from the center (5).</string>
@@ -57,7 +63,17 @@
     <string name="learn_keyboard_not_selected">The Swipe Keyboard is not selected. Please select it to proceed with the interactive tutorial.</string>
     <string name="learn_keyboard_not_enabled">The Swipe Keyboard is not enabled. Please enable it in settings first.</string>
     <string name="next">Next</string>
-    <string name="layout_tutorial_desc">Each card shows a swipe between two zones. Swiping between them performs the action. Click any card to change its function.</string>
+    <string name="layout_tutorial_desc">Each card shows a swipe between two zones. Swiping between them performs the action. Click any card to change its function.\n\nUse the buttons at the top right to add new languages or reorder/delete existing layouts.</string>
+    <string name="manage_layouts_hint">Long press and drag items to reorder. Swipe left or right to delete.</string>
+    <string name="delete_confirm_title">Delete layout?</string>
+    <string name="delete_confirm_msg">Are you sure you want to delete this layout?</string>
     <string name="layout_tutorial_got_it">Got it!</string>
+    <string name="add_layout_title">Add Layout</string>
+    <string name="add_layout_copy">Copy Current</string>
+    <string name="add_layout_predefined">Predefined Language</string>
+    <string name="select_language">Select Language</string>
+    <string name="manage_layouts">Manage Layouts</string>
+    <string name="delete">Delete</string>
+    <string name="layout_n">Layout №%1$d</string>
     <string name="layout_tutorial_skip">I already know everything</string>
 </resources>

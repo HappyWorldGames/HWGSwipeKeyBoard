@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +16,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.happyworldgames.keyboard.databinding.SettingKeyboardBinding
 import com.happyworldgames.keyboard.databinding.SettingKeyboardViewPagerBinding
-import java.io.File
 
 
 class SettingKeyBoardLayout : AppCompatActivity() {
@@ -72,23 +72,11 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         mediator.attach()
 
         settingKeyBoardViewPagerBinding.addLayout.setOnClickListener {
-            val newLayout = ArrayList(SimpleIME.hintArrayList.lastOrNull() ?: SimpleIME.hintArrayList[0])
-            SimpleIME.hintArrayList.add(newLayout)
-            settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyItemInserted(SimpleIME.hintArrayList.size - 1)
-            settingKeyBoardViewPagerBinding.keyLayoutView.currentItem = SimpleIME.hintArrayList.size - 1
-            SimpleIME.saveHintArrayListAsync(this)
+            showAddLayoutDialog()
         }
 
-        settingKeyBoardViewPagerBinding.deleteLayout.setOnClickListener {
-            if (SimpleIME.hintArrayList.size > 1) {
-                val currentItem = settingKeyBoardViewPagerBinding.keyLayoutView.currentItem
-                SimpleIME.hintArrayList.removeAt(currentItem)
-                settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyItemRemoved(currentItem)
-                SimpleIME.saveHintArrayListAsync(this)
-                // Re-attaching mediator to refresh tab names.
-                mediator.detach()
-                mediator.attach()
-            }
+        settingKeyBoardViewPagerBinding.manageLayouts.setOnClickListener {
+            showManageLayoutsDialog()
         }
 
         SimpleIME.loadHintArrayListAsync(this@SettingKeyBoardLayout) {
@@ -96,6 +84,159 @@ class SettingKeyBoardLayout : AppCompatActivity() {
             mediator.detach()
             mediator.attach()
         }
+    }
+
+    private fun showAddLayoutDialog() {
+        val options = arrayOf(
+            getString(R.string.add_layout_copy),
+            getString(R.string.add_layout_predefined)
+        )
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.add_layout_title)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> addCopyLayout()
+                    1 -> showPredefinedLanguagesDialog()
+                }
+            }
+            .show()
+    }
+
+    private fun addCopyLayout() {
+        val currentLayout = SimpleIME.hintArrayList.getOrNull(settingKeyBoardViewPagerBinding.keyLayoutView.currentItem)
+            ?: SimpleIME.hintArrayList[0]
+        val newLayout = ArrayList(currentLayout)
+        addNewLayoutToArrayList(newLayout)
+    }
+
+    private fun showPredefinedLanguagesDialog() {
+        val languages = SimpleIME.predefinedLayouts.keys.toTypedArray()
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.select_language)
+            .setItems(languages) { _, which ->
+                val selectedLang = languages[which]
+                val predefined = SimpleIME.predefinedLayouts[selectedLang]
+                if (predefined != null) {
+                    addNewLayoutToArrayList(ArrayList(predefined))
+                }
+            }
+            .show()
+    }
+
+    private fun addNewLayoutToArrayList(newLayout: ArrayList<String>) {
+        SimpleIME.hintArrayList.add(newLayout)
+        settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyItemInserted(SimpleIME.hintArrayList.size - 1)
+        settingKeyBoardViewPagerBinding.keyLayoutView.currentItem = SimpleIME.hintArrayList.size - 1
+        SimpleIME.saveHintArrayListAsync(this)
+        refreshTabs()
+    }
+
+    private fun refreshTabs() {
+        // Re-attaching mediator to refresh tab names.
+        val mediator = TabLayoutMediator(settingKeyBoardViewPagerBinding.keyLayouts, settingKeyBoardViewPagerBinding.keyLayoutView) { tab, position ->
+            tab.text = "№$position"
+        }
+        mediator.attach()
+    }
+
+    private fun showManageLayoutsDialog() {
+        val container = android.widget.LinearLayout(this)
+        container.orientation = android.widget.LinearLayout.VERTICAL
+        container.setPadding(32, 32, 32, 0)
+
+        val hint = TextView(this)
+        hint.text = getString(R.string.manage_layouts_hint)
+        hint.textSize = 14f
+        hint.alpha = 0.7f
+        hint.setPadding(16, 0, 16, 16)
+        container.addView(hint)
+
+        val recyclerView = RecyclerView(this)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        val adapter = ManageLayoutsAdapter(SimpleIME.hintArrayList) {
+            refreshTabs()
+            settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyDataSetChanged()
+            SimpleIME.saveHintArrayListAsync(this)
+        }
+        recyclerView.adapter = adapter
+        container.addView(recyclerView)
+
+        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(rv: RecyclerView, vh: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                val fromPos = vh.adapterPosition
+                val toPos = target.adapterPosition
+                val item = SimpleIME.hintArrayList.removeAt(fromPos)
+                SimpleIME.hintArrayList.add(toPos, item)
+                adapter.notifyItemMoved(fromPos, toPos)
+                return true
+            }
+
+            override fun onSwiped(vh: RecyclerView.ViewHolder, direction: Int) {
+                val pos = vh.adapterPosition
+                confirmAndDelete(pos, adapter)
+            }
+        })
+        touchHelper.attachToRecyclerView(recyclerView)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.manage_layouts)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                refreshTabs()
+                settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyDataSetChanged()
+                SimpleIME.saveHintArrayListAsync(this)
+            }
+            .show()
+    }
+
+    private fun confirmAndDelete(position: Int, adapter: ManageLayoutsAdapter) {
+        if (SimpleIME.hintArrayList.size <= 1) {
+            adapter.notifyItemChanged(position)
+            return
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.delete_confirm_title)
+            .setMessage(R.string.delete_confirm_msg)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                SimpleIME.hintArrayList.removeAt(position)
+                adapter.notifyItemRemoved(position)
+                adapter.onLayoutsChanged()
+            }
+            .setNegativeButton(R.string.cancel) { _, _ ->
+                adapter.notifyItemChanged(position)
+            }
+            .setOnCancelListener {
+                adapter.notifyItemChanged(position)
+            }
+            .show()
+    }
+
+    inner class ManageLayoutsAdapter(
+        private val layouts: ArrayList<ArrayList<String>>,
+        val onLayoutsChanged: () -> Unit
+    ) : RecyclerView.Adapter<ManageLayoutsAdapter.ViewHolder>() {
+
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val title: TextView = view.findViewById(R.id.layout_title)
+            val delete: View = view.findViewById(R.id.delete_button)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_manage_layout, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            holder.title.text = getString(R.string.layout_n, position)
+            holder.delete.setOnClickListener {
+                confirmAndDelete(holder.adapterPosition, this)
+            }
+        }
+
+        override fun getItemCount() = layouts.size
     }
 
     override fun onResume() {

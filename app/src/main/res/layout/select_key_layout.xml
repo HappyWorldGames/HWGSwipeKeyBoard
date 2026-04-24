@@ -21,9 +21,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/backspace"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/manage_languages"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="DuplicateSpeakableTextCheck" />
+
+    <ImageButton
+        android:id="@+id/manage_languages"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_add"
+        android:contentDescription="@string/manage_languages"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/backspace"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/backspace" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
