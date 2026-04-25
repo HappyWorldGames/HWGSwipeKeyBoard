@@ -2,8 +2,6 @@ package com.happyworldgames.keyboard
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -19,7 +17,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -98,7 +96,7 @@ class LearningActivity : AppCompatActivity() {
             if (!isKeyboardEnabled()) {
                 startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
             } else if (!isKeyboardSelected()) {
-                val imeManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imeManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                 imeManager.showInputMethodPicker()
             } else {
                 moveToNext()
@@ -141,8 +139,8 @@ class LearningActivity : AppCompatActivity() {
                 currentStep = 0
                 // При переходе к практике фокусируемся на поле ввода
                 editText.requestFocus()
-                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(editText, 0)
             }
         } else {
             if (currentStep < practiceSteps.size - 1) {
@@ -161,7 +159,7 @@ class LearningActivity : AppCompatActivity() {
     }
 
     private fun isKeyboardEnabled(): Boolean {
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         return imm.enabledInputMethodList.any { it.packageName == packageName }
     }
 
@@ -212,7 +210,7 @@ class LearningActivity : AppCompatActivity() {
     }
 
     private fun completeStep() {
-        editText.setBackgroundColor(Color.parseColor("#2000FF00"))
+        editText.setBackgroundColor("#2000FF00".toColorInt())
         editText.postDelayed({
             editText.setBackgroundColor(Color.TRANSPARENT)
             moveToNext()
@@ -234,7 +232,7 @@ class LearningActivity : AppCompatActivity() {
             if (child.id == R.id.vPos5) {
                  child.setBackgroundResource(R.drawable.circle_center)
             } else {
-                 child.setBackgroundColor(Color.parseColor("#20000000"))
+                 child.setBackgroundColor("#20000000".toColorInt())
             }
         }
 
@@ -244,8 +242,8 @@ class LearningActivity : AppCompatActivity() {
         val endView = getZoneView(endZone)
 
         // Подсвечиваем активные зоны
-        startView.setBackgroundColor(Color.parseColor("#4000FF00"))
-        endView.setBackgroundColor(Color.parseColor("#4000FF00"))
+        startView.setBackgroundColor("#4000FF00".toColorInt())
+        endView.setBackgroundColor("#4000FF00".toColorInt())
 
         gestureArrow.visibility = View.VISIBLE
         

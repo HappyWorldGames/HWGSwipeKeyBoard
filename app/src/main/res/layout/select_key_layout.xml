@@ -9,12 +9,12 @@
         android:id="@+id/editText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:hint="@string/edit_text_hint"
         android:importantForAutofill="no"
         android:inputType="textFilter"
         app:layout_constraintEnd_toStartOf="@+id/backspace"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="SpeakableTextPresentCheck" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/backspace"

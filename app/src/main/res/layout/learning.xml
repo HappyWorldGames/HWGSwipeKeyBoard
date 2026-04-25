@@ -36,6 +36,7 @@
         android:layout_marginTop="24dp"
         android:gravity="center"
         android:hint="@string/for_test"
+        android:importantForAutofill="no"
         android:inputType="textMultiLine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -68,15 +69,15 @@
             android:columnCount="3"
             android:rowCount="3">
 
-            <TextView android:id="@+id/vPos1" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="1" android:textColor="#40000000" />
-            <TextView android:id="@+id/vPos2" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="2" android:textColor="#40000000" />
-            <TextView android:id="@+id/vPos3" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="3" android:textColor="#40000000" />
-            <TextView android:id="@+id/vPos4" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="4" android:textColor="#40000000" />
-            <TextView android:id="@+id/vPos5" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="@drawable/circle_center" android:gravity="center" android:text="5" android:textColor="#40000000" />
-            <TextView android:id="@+id/vPos6" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="6" android:textColor="#40000000" />
-            <TextView android:id="@+id/vPos7" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="7" android:textColor="#40000000" />
-            <TextView android:id="@+id/vPos8" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="8" android:textColor="#40000000" />
-            <TextView android:id="@+id/vPos9" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="9" android:textColor="#40000000" />
+            <TextView android:id="@+id/vPos1" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="1" android:textColor="#40000000" tools:ignore="HardcodedText" />
+            <TextView android:id="@+id/vPos2" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="2" android:textColor="#40000000" tools:ignore="HardcodedText" />
+            <TextView android:id="@+id/vPos3" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="3" android:textColor="#40000000" tools:ignore="HardcodedText" />
+            <TextView android:id="@+id/vPos4" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="4" android:textColor="#40000000" tools:ignore="HardcodedText" />
+            <TextView android:id="@+id/vPos5" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="@drawable/circle_center" android:gravity="center" android:text="5" android:textColor="#40000000" tools:ignore="HardcodedText" />
+            <TextView android:id="@+id/vPos6" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="6" android:textColor="#40000000" tools:ignore="HardcodedText" />
+            <TextView android:id="@+id/vPos7" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="7" android:textColor="#40000000" tools:ignore="HardcodedText" />
+            <TextView android:id="@+id/vPos8" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="8" android:textColor="#40000000" tools:ignore="HardcodedText" />
+            <TextView android:id="@+id/vPos9" android:layout_width="0dp" android:layout_height="0dp" android:layout_columnWeight="1" android:layout_rowWeight="1" android:layout_margin="2dp" android:background="#20000000" android:gravity="center" android:text="9" android:textColor="#40000000" tools:ignore="HardcodedText" />
 
         </GridLayout>
 
@@ -86,6 +87,7 @@
             android:layout_height="48dp"
             android:alpha="0.8"
             android:visibility="gone"
+            android:contentDescription="@null"
             app:srcCompat="@android:drawable/ic_menu_send"
             app:tint="@color/black" />
 

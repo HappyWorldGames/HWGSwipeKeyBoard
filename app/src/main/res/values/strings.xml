@@ -76,4 +76,6 @@
     <string name="delete">Delete</string>
     <string name="layout_n">Layout №%1$d</string>
     <string name="layout_tutorial_skip">I already know everything</string>
+    <string name="add_layout">Add layout</string>
+    <string name="edit_text_hint">Enter symbol</string>
 </resources>

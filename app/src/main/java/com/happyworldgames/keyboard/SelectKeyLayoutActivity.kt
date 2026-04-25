@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -28,6 +29,9 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val TYPE_HEADER = 0
+        private const val TYPE_SYMBOL = 1
+
         // Базовый набор символов с категориями
         private fun getSymbolsWithHeaders(resources: Resources) = arrayListOf(
             SymbolItem.Header(resources.getString(R.string.category_management)),
@@ -143,7 +147,9 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
 
     private fun saveActiveLanguages() {
         val prefs = getSharedPreferences("keyboard_prefs", MODE_PRIVATE)
-        prefs.edit().putStringSet("active_languages", activeLanguages.map { it.first }.toSet()).apply()
+        prefs.edit {
+            putStringSet("active_languages", activeLanguages.map { it.first }.toSet())
+        }
     }
 
     private fun showLanguageSelectionDialog() {
@@ -209,8 +215,6 @@ class SelectKeyLayoutActivity : AppCompatActivity() {
     }
 
     inner class SymbolsWithHeadersAdapter(private val items: List<SymbolItem>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-        private val TYPE_HEADER = 0
-        private val TYPE_SYMBOL = 1
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {
             is SymbolItem.Header -> TYPE_HEADER

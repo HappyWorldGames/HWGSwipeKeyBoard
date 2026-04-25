@@ -106,7 +106,7 @@ class SimpleIME : InputMethodService() {
             Thread {
                 try {
                     ensureSaveFileInitialized(context)
-                    loadHintArrayListSync(context)
+                    loadHintArrayListSync()
 
                     // Обновление UI должно происходить в основном потоке
                     mainHandler.post {
@@ -124,7 +124,7 @@ class SimpleIME : InputMethodService() {
         }
 
         // Синхронная загрузка (вызывать только в фоновом потоке)
-        private fun loadHintArrayListSync(context: Context) {
+        private fun loadHintArrayListSync() {
             if (!saveFile.exists()) {
                 Log.d(TAG, "Save file not found, using default layouts")
                 return
@@ -138,7 +138,6 @@ class SimpleIME : InputMethodService() {
                 }
 
                 val json = JSONObject(jsonString)
-                val version = json.optInt("version", 0)
 
                 if (json.has("layouts") && json.get("layouts") is JSONArray) {
                     val layoutsArray = json.getJSONArray("layouts")

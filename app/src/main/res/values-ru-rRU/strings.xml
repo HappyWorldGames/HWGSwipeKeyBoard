@@ -75,4 +75,6 @@
     <string name="delete">Удалить</string>
     <string name="layout_n">Раскладка №%1$d</string>
     <string name="layout_tutorial_skip">Я уже всё знаю, отстань</string>
+    <string name="add_layout">Добавить раскладку</string>
+    <string name="edit_text_hint">Введите символ</string>
 </resources>

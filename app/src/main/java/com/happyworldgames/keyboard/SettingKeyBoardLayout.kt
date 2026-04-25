@@ -1,6 +1,5 @@
 package com.happyworldgames.keyboard
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
@@ -11,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -42,22 +42,22 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         }
 
         // Check if tutorial should be shown
-        val prefs = getSharedPreferences("keyboard_prefs", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("keyboard_prefs", MODE_PRIVATE)
         if (!prefs.getBoolean("layout_tutorial_shown", false)) {
             settingKeyBoardViewPagerBinding.tutorialOverlay.visibility = View.VISIBLE
         }
 
         settingKeyBoardViewPagerBinding.btnGotIt.setOnClickListener {
             settingKeyBoardViewPagerBinding.tutorialOverlay.visibility = View.GONE
-            prefs.edit().putBoolean("layout_tutorial_shown", true).apply()
+            prefs.edit { putBoolean("layout_tutorial_shown", true) }
         }
 
         settingKeyBoardViewPagerBinding.btnSkipTutorial.setOnClickListener {
             settingKeyBoardViewPagerBinding.tutorialOverlay.visibility = View.GONE
-            prefs.edit().putBoolean("layout_tutorial_shown", true).apply()
+            prefs.edit { putBoolean("layout_tutorial_shown", true) }
         }
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 SimpleIME.replaceKeyBoardLayout(0)
                 SimpleIME.saveHintArrayListAsync(this@SettingKeyBoardLayout)
@@ -117,8 +117,7 @@ class SettingKeyBoardLayout : AppCompatActivity() {
             .setTitle(R.string.select_language)
             .setItems(languages) { _, which ->
                 val selectedLang = languages[which]
-                val predefined = SimpleIME.predefinedLayouts[selectedLang]
-                if (predefined != null) {
+                SimpleIME.predefinedLayouts[selectedLang]?.let { predefined ->
                     addNewLayoutToArrayList(ArrayList(predefined))
                 }
             }
@@ -165,8 +164,8 @@ class SettingKeyBoardLayout : AppCompatActivity() {
 
         val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(rv: RecyclerView, vh: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-                val fromPos = vh.adapterPosition
-                val toPos = target.adapterPosition
+                val fromPos = vh.bindingAdapterPosition
+                val toPos = target.bindingAdapterPosition
                 val item = SimpleIME.hintArrayList.removeAt(fromPos)
                 SimpleIME.hintArrayList.add(toPos, item)
                 adapter.notifyItemMoved(fromPos, toPos)
@@ -174,7 +173,7 @@ class SettingKeyBoardLayout : AppCompatActivity() {
             }
 
             override fun onSwiped(vh: RecyclerView.ViewHolder, direction: Int) {
-                val pos = vh.adapterPosition
+                val pos = vh.bindingAdapterPosition
                 confirmAndDelete(pos, adapter)
             }
         })
@@ -232,7 +231,7 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.title.text = getString(R.string.layout_n, position)
             holder.delete.setOnClickListener {
-                confirmAndDelete(holder.adapterPosition, this)
+                confirmAndDelete(holder.bindingAdapterPosition, this)
             }
         }
 
@@ -241,12 +240,6 @@ class SettingKeyBoardLayout : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-//        TODO()
-//        if (intent.extras != null) {
-//            settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyItemChanged(
-//                intent.extras!!.getInt("itemPos")
-//            )
-//        }
         settingKeyBoardViewPagerBinding.keyLayoutView.adapter?.notifyDataSetChanged()
     }
 
