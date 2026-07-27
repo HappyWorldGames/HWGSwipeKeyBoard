@@ -1,8 +1,8 @@
-🇬🇧 [English](#hwg-swipe-keyboard-📱⌨️) | 🇷🇺 [Русский](#описание-на-русском)
+🇬🇧 [English](#hwg-swipe-keyboard) | 🇷🇺 [Русский](#-описание-на-русском)
 
 ---
 
-## HWG Swipe Keyboard 📱⌨️
+# HWG Swipe Keyboard
 
 A custom Android keyboard with swipe gesture support, developed and published on Google Play. This project demonstrates a deep understanding of Android input methods, touch event handling, and performance optimization.
 
