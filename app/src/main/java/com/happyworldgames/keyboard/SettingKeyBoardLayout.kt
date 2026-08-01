@@ -12,8 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -32,14 +30,11 @@ class SettingKeyBoardLayout : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(settingKeyBoardViewPagerBinding.root)
 
-        val controller = WindowInsetsControllerCompat(window, settingKeyBoardViewPagerBinding.root)
-        controller.isAppearanceLightStatusBars = true
+        setSupportActionBar(settingKeyBoardViewPagerBinding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        ViewCompat.setOnApplyWindowInsetsListener(settingKeyBoardViewPagerBinding.root) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
-            windowInsets
-        }
+        val controller = WindowInsetsControllerCompat(window, settingKeyBoardViewPagerBinding.root)
+        controller.isAppearanceLightStatusBars = false
 
         // Check if tutorial should be shown
         val prefs = getSharedPreferences("keyboard_prefs", MODE_PRIVATE)
@@ -84,6 +79,14 @@ class SettingKeyBoardLayout : AppCompatActivity() {
             mediator.detach()
             mediator.attach()
         }
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressedDispatcher.onBackPressed()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun showAddLayoutDialog() {

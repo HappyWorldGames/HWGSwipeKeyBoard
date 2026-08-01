@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.happyworldgames.keyboard.databinding.MainBinding
 
@@ -17,17 +14,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(mainBinding.root)
 
-        val controller = WindowInsetsControllerCompat(window, mainBinding.root)
-        controller.isAppearanceLightStatusBars = true
+        setSupportActionBar(mainBinding.toolbar)
 
-        ViewCompat.setOnApplyWindowInsetsListener(mainBinding.root) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
-            windowInsets
-        }
+        val controller = WindowInsetsControllerCompat(window, mainBinding.root)
+        controller.isAppearanceLightStatusBars = false
 
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
